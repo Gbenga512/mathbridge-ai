@@ -1,0 +1,7 @@
+import React from 'react';
+import {buildParentSummary} from './parentReport';
+
+export default function ParentDashboard({name='Student',term='T1',termHistory={},progress={},onBack}){
+ const r=buildParentSummary({studentName:name,term,termHistory,progress});
+ return <main className="dashboard"><div className="dashhead"><div><p className="step">PARENT VIEW</p><h2>{name}'s Maths Progress</h2><p className="leveltext">{term==='T1'?'First Term':term==='T2'?'Second Term':'Third Term'} • Current week {r.currentWeek}</p></div><button className="secondary" onClick={onBack}>← Back</button></div><div className="stats"><div><small>Term average</small><b>{r.average}%</b></div><div><small>Weeks mastered</small><b>{r.masteredWeeks}</b></div><div><small>Current week</small><b>{r.currentWeek}</b></div></div><div className="report"><h3>🔴 Areas needing support</h3>{r.weak.length?<div className="topic-results">{r.weak.map(x=><div key={x.topic}><span>{x.topic}</span><b className={x.score<70?'weakscore':''}>{x.score}%</b></div>)}</div>:<p>Complete more assessments to identify weak areas.</p>}<h3>🟢 Strong areas</h3><div className="tags">{r.strong.length?r.strong.map(x=><span key={x.topic}>✓ {x.topic} · {x.score}%</span>):<span>No strong areas recorded yet.</span>}</div><div className="recommend"><b>🎯 Recommended support</b><small>{r.advice}</small></div><p className="note">Use this report to guide practice or discuss targeted support with the child's teacher.</p></div></main>
+}
