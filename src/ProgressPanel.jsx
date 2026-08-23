@@ -1,7 +1,7 @@
 import React from 'react';
 import WeeklyRoadmap from './WeeklyRoadmap';
 import {jss1Weekly} from './data/jss1Weekly';
-import {TERM_ORDER,defaultProgress,loadProgress,saveProgress,termCompleted} from './progression';
+import {TERM_ORDER,defaultProgress,loadProgress,saveProgress,termCompleted,completeWeek} from './progression';
 
 export default function ProgressPanel({onStartWeek}){
  const [progress,setProgress]=React.useState(loadProgress);
@@ -10,11 +10,7 @@ export default function ProgressPanel({onStartWeek}){
  const total=jss1Weekly[progress.term]?.length||0;
  const completed=(progress.masteredWeeks||[]).filter(k=>k.startsWith(progress.term+'-')).length;
  const pct=total?Math.round(completed/total*100):0;
- const finishDemoWeek=()=>{
-  const {completeWeek}=require('./progression');
-  const next=completeWeek(progress,progress.term,progress.week);
-  setProgress(next);saveProgress(next);
- };
+ const finishDemoWeek=()=>{const next=completeWeek(progress,progress.term,progress.week);setProgress(next);saveProgress(next)};
  const reset=()=>{setProgress(defaultProgress);saveProgress(defaultProgress)};
  return <section className="progress-panel">
   <div className="progress-panel-head"><div><span className="step">JSS1 LEARNING PROGRESS</span><h2>{termName}</h2><p>Week {progress.week} of {total} • {pct}% of this term mastered</p></div><button className="secondary" onClick={reset}>Reset Progress</button></div>
