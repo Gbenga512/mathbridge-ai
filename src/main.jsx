@@ -17,7 +17,14 @@ function App(){
  const selectedLevel=levelOptions.find(x=>x.value===level);
  const levelTopics=curriculum.jss.levels[level]?.topics||curriculum.primary.levels[level]?.topics||curriculum.sss.levels[level]?.topics||[];
  const questions=level==='JSS1'?jss1Questions:genericDiagnostic;
- const result=useMemo(()=>{const correct=questions.reduce((n,q,idx)=>n+(q.correct!==undefined&&answers[idx]===q.correct?1:0),0);const weak=level==='JSS1'?jss1Math.strands.flatMap(s=>s.topics).filter(t=>{const qs=jss1Questions.filter(q=>q.topic===t);return qs.length&&qs.some(q=>answers[jss1Questions.indexOf(q)]!==q.answer)}).slice(0,3):['Fractions','Algebra','Percentages'].filter((t,idx)=>answers[idx+2]!==1);return {correct,score:Math.round(correct/Math.max(1,questions.filter(q=>q.correct!==undefined).length)*100),weak};},[answers,level,questions]);
+ const result=useMemo(()=>{
+   const scored=questions.map((q,idx)=>({q,idx,correctAnswer:level==='JSS1'?q.answer:q.correct})).filter(x=>x.correctAnswer!==undefined);
+   const correct=scored.reduce((n,x)=>n+(answers[x.idx]===x.correctAnswer?1:0),0);
+   const weak=level==='JSS1'
+     ? jss1Math.strands.flatMap(s=>s.topics).filter(t=>{const qs=jss1Questions.filter(q=>q.topic===t);return qs.length&&qs.every(q=>answers[jss1Questions.indexOf(q)]!==q.answer)}).slice(0,3)
+     : ['Fractions','Algebra','Percentages'].filter((t,idx)=>answers[idx+2]!==1);
+   return {correct,score:Math.round(correct/Math.max(1,scored.length)*100),weak};
+ },[answers,level,questions]);
  const answer=(n)=>{const next=[...answers];next[i]=n;setAnswers(next);if(i<questions.length-1)setI(i+1);else {setLessonTopic(result.weak[0]||levelTopics[0]||'Foundation Builder');setScreen('result')}};
  const start=()=>{setI(0);setAnswers([]);setScreen('quiz')};
  return <div className="app"><header><button className="logo" onClick={()=>setScreen('home')}>Math<span>Bridge</span></button><div className="nav"><span>🇳🇬 NERDC-aligned</span><button className="ghost" onClick={()=>setScreen('home')}>Home</button></div></header>
