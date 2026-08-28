@@ -1,0 +1,49 @@
+name: Correct curriculum wording
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  correct-wording:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Correct curriculum wording
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('src/main.jsx')
+          s = p.read_text(encoding='utf-8')
+          replacements = {
+              '🇳🇬 JSS1 • Nigerian Mathematics': '🇳🇬 Nigerian Mathematics Scheme',
+              'MathBridge follows the JSS1 scheme term by term, then week by week.': 'MathBridge follows the Nigerian Mathematics scheme for the selected class, term by term, then week by week.',
+          }
+          changed = False
+          for old, new in replacements.items():
+              if old in s:
+                  s = s.replace(old, new)
+                  changed = True
+          if changed:
+              p.write_text(s, encoding='utf-8')
+          else:
+              print('No wording change required.')
+          PY
+
+      - name: Commit correction
+        run: |
+          if git diff --quiet; then
+            echo 'No changes to commit.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add src/main.jsx
+          git commit -m 'Correct Nigerian Mathematics scheme wording'
+          git push
