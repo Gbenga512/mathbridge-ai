@@ -1,19 +1,21 @@
-// Primary 1 lesson cards for MathBridge. Topics follow the verified NERDC Primary 1-3 Mathematics source.
+// Primary 1 lesson cards for MathBridge.
+// The topic set is based on the verified NERDC Primary 1-3 Mathematics curriculum.
+const lesson=(simple,method,memory,example)=>({simple,method,memory,example});
 export const primary1Lessons={
- 'Whole numbers 1-5':{simple:'Numbers tell us how many things we have. Start at 1 and count one object at a time up to 5.',method:'Touch or point to each object once while saying 1, 2, 3, 4, 5.',memory:'One, two, three, four, five — count the things you see.'},
- 'Whole number 0 (Zero)':{simple:'Zero means there are no objects.',method:'Look at the group. If nothing is there, the number is 0.',memory:'Zero means none.'},
- 'Whole numbers 6-9':{simple:'After 5 come 6, 7, 8 and 9.',method:'Count forward one number at a time.',memory:'Six, seven, eight, nine — keep counting in line.'},
- 'Whole number 10':{simple:'Ten is a group made from ten units.',method:'Count ten objects and group them together.',memory:'Ten ones make one ten.'},
- 'Whole numbers 1-99':{simple:'Numbers continue from 1 through 99. We can compare them and put them in order.',method:'Compare the numbers and count forward or backward to find position.',memory:'Small to big: count forward.'},
- 'Fractions: halves and quarters':{simple:'A fraction can describe an equal part of a whole. A half has 2 equal parts; a quarter has 4.',method:'Divide a whole into equal parts, then count the parts.',memory:'Half = 2 equal parts; quarter = 4 equal parts.'},
- 'Addition':{simple:'Addition means putting quantities together to find how many altogether.',method:'Start with the first number and count on by the second number.',memory:'Addition means put together.'},
- 'Subtraction':{simple:'Subtraction means taking some away from a quantity.',method:'Start with the larger number and count backwards.',memory:'Subtraction means take away.'},
- 'Open sentences':{simple:'An open sentence has a missing number. Find the number that makes the statement true.',method:'Try the choices and check which one makes the equation correct.',memory:'Fill the gap to make it true.'},
- 'Nigerian money':{simple:'Nigeria uses the naira, written with the symbol ₦.',method:'Read the amount and compare naira values.',memory:'₦ means naira.'},
- 'Length':{simple:'Length tells us how long or short something is.',method:'Compare objects by placing their ends together.',memory:'Length = how long.'},
- 'Time':{simple:'Time helps us know when things happen. A week has 7 days.',method:'Use a clock or calendar to identify periods of time.',memory:'7 days make a week.'},
- 'Weight':{simple:'Weight helps us compare how heavy or light objects are.',method:'Compare two objects and identify which feels heavier or lighter.',memory:'Weight = how heavy.'},
- '2-dimensional shapes':{simple:'Flat shapes have length and width. Examples include triangles, squares and rectangles.',method:'Count sides and look at the shape of the boundary.',memory:'2D shapes are flat.'},
- '3-dimensional shapes':{simple:'Solid shapes take up space. Examples include spheres and cubes.',method:'Look at the solid object from different sides.',memory:'3D shapes take up space.'},
- 'Data collection':{simple:'Data is information we collect, such as answers to questions about what pupils like.',method:'Ask a clear question, record answers, then count them.',memory:'Ask, record, count.'}
+ 'Whole numbers 1-5':lesson('Numbers tell us how many things we have. Count objects one at a time from 1 to 5.','Point to each object once while saying 1, 2, 3, 4, 5.','One, two, three, four, five — count what you see.','3 pencils means the number 3.'),
+ 'Whole number 0 (Zero)':lesson('Zero means there are no objects.','If the group is empty, write 0.','Zero means none.','0 oranges means no oranges.'),
+ 'Whole numbers 6-9':lesson('After 5 come 6, 7, 8 and 9.','Count forward one number at a time.','Six, seven, eight, nine — keep counting in line.','6, 7, 8, 9.'),
+ 'Whole number 10':lesson('Ten is a group of ten units.','Count ten objects and group them together.','Ten ones make one ten.','10 = 1 ten.'),
+ 'Whole numbers 1-99':lesson('Numbers continue from 1 through 99 and can be ordered from smaller to larger.','Compare the tens first, then the units when needed.','Small to big: count forward.','42 is greater than 24.'),
+ 'Fractions: halves and quarters':lesson('A fraction describes an equal part of a whole. A half has 2 equal parts and a quarter has 4.','Divide the whole into equal parts, then identify one part.','Half = 2 equal parts; quarter = 4 equal parts.','One of two equal parts is 1/2.'),
+ 'Addition':lesson('Addition means putting quantities together.','Start with the first number and count on by the second number.','Addition means put together.','2 + 3 = 5.'),
+ 'Subtraction':lesson('Subtraction means taking some away.','Start with the first number and count backwards by the amount taken away.','Subtraction means take away.','5 - 2 = 3.'),
+ 'Open sentences':lesson('An open sentence has a missing number that must make the statement true.','Try a possible number and check the equation.','Fill the gap to make it true.','3 + __ = 5, so __ = 2.'),
+ 'Nigerian money':lesson('Nigeria uses the naira. Its symbol is ₦.','Read and compare amounts in naira.','₦ means naira.','₦20 is greater than ₦10.'),
+ 'Length':lesson('Length tells us how long or short something is.','Place objects side by side with their ends together to compare.','Length = how long.','A ruler is usually longer than an eraser.'),
+ 'Time':lesson('Time tells us when things happen. A week has 7 days.','Use a clock for daily time and a calendar for days and weeks.','7 days make a week.','Monday to Sunday is one week.'),
+ 'Weight':lesson('Weight helps us compare how heavy or light objects are.','Compare objects and identify the heavier or lighter one.','Weight = how heavy.','A stone is usually heavier than a feather.'),
+ '2-dimensional shapes':lesson('2D shapes are flat shapes.','Look at the outline and count the sides.','2D shapes are flat.','A triangle has 3 sides; a square has 4 equal sides.'),
+ '3-dimensional shapes':lesson('3D shapes are solid objects that take up space.','Look at the object from different sides and identify its solid shape.','3D shapes take up space.','A ball is shaped like a sphere.'),
+ 'Data collection':lesson('Data is information we collect, such as pupils answers to a question.','Ask a clear question, record responses and count them.','Ask, record, count.','If 3 pupils choose rice and 2 choose beans, there are 5 responses.')
 };
