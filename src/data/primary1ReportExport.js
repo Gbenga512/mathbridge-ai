@@ -1,0 +1,2 @@
+// Primary 1 report export payload for learner/parent/teacher views.
+export const buildPrimary1ReportExport=(learnerName,termReports={})=>({learnerName:learnerName||'Learner',className:'Primary 1',terms:['Term 1','Term 2','Term 3'].map(term=>({term,complete:Boolean(termReports[term]?.complete),score:termReports[term]?.overallScore??null,weakPoints:termReports[term]?.weakPoints||[]})),generatedAt:new Date().toISOString()});
