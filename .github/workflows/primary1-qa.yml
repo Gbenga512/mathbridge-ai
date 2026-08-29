@@ -20,4 +20,5 @@ jobs:
       - run: node scripts/primary4-qa.mjs
       - run: node scripts/primary5-qa.mjs
       - run: node scripts/primary6-qa.mjs
+      - run: node scripts/jss1-qa.mjs
       - run: npm run build
