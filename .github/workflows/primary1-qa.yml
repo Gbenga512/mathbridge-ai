@@ -1,4 +1,4 @@
-name: Primary 1 QA
+name: Primary Curriculum QA
 on:
   push:
     branches: [main]
@@ -15,4 +15,5 @@ jobs:
           cache: npm
       - run: npm ci
       - run: node scripts/primary1-qa.mjs
+      - run: node scripts/primary2-qa.mjs
       - run: npm run build
