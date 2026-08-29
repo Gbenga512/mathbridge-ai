@@ -16,4 +16,5 @@ jobs:
       - run: npm ci
       - run: node scripts/primary1-qa.mjs
       - run: node scripts/primary2-qa.mjs
+      - run: node scripts/primary3-qa.mjs
       - run: npm run build
