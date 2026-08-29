@@ -1,0 +1,2 @@
+// Primary 1 Term 1 assessment and mastery scoring.
+export const scorePrimary1Term1Assessment=(questions,answers)=>{const total=questions.length;const correct=questions.reduce((n,q)=>n+(String(answers?.[q.id]??'').trim().toLowerCase()===String(q.answer).trim().toLowerCase()?1:0),0);const score=total?Math.round(correct/total*100):0;return{total,correct,score,mastered:score>=80,status:score>=80?'Mastered':'Needs Practice',recommendation:score>=80?'Proceed to the next lesson or topic.':'Review incorrect answers and practise the weak topics again.'};};
