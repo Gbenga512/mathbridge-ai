@@ -1,0 +1,6 @@
+// JSS 3 Mathematics curriculum. Designed as a clear bridge to BECE/Junior WAEC preparation.
+export const jss3TermMap={
+'Term 1':{label:'Term 1 • Number, Algebra and Commercial Mathematics',topics:['Number bases and modular arithmetic','Fractions, decimals and percentages','Standard form and approximation','Indices, logarithms and surds basics','Ratio, proportion and rates','Profit, loss, discount and commission','Simple and compound interest','Algebraic expressions and factorisation','Linear equations and inequalities','Simultaneous linear equations','Variation']},
+'Term 2':{label:'Term 2 • Geometry, Mensuration and Coordinate Geometry',topics:['Angles, parallel lines and polygons','Congruence and similarity','Circle theorems','Construction and loci','Perimeter and area','Surface area and volume','Pythagoras theorem','Trigonometry basics','Bearings and scale drawing','Coordinates and gradients','Linear and quadratic graphs']},
+'Term 3':{label:'Term 3 • Statistics, Probability and BECE Preparation',topics:['Data collection and frequency distributions','Charts, histograms and cumulative frequency','Mean, median, mode and range','Probability and tree diagrams','Sequences and arithmetic progression','Sets and Venn diagrams','Logical reasoning and problem solving','Statistics and probability applications','BECE mixed revision','BECE practice assessment']}
+};
