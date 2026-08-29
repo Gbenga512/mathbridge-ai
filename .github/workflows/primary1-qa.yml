@@ -24,4 +24,5 @@ jobs:
       - run: node scripts/jss1-integration-qa.mjs
       - run: node scripts/jss2-qa.mjs
       - run: node scripts/jss2-integration-qa.mjs
+      - run: node scripts/jss3-qa.mjs
       - run: npm run build
