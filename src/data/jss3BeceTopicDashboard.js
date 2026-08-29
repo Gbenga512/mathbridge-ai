@@ -1,0 +1,1 @@
+export const buildJSS3BeceTopicDashboard=(history)=>{const latest=history?.[0];if(!latest?.topics)return[];return latest.topics.map(x=>({...x,status:x.percentage>=80?'Strong':x.percentage>=50?'Improving':'Needs Revision',action:x.percentage>=80?'Maintain with practice':x.percentage>=50?'Practise again':'Open lesson and practise'})).sort((a,b)=>a.percentage-b.percentage)};
