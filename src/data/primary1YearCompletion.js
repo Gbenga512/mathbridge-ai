@@ -1,0 +1,2 @@
+// Primary 1 year completion summary.
+export const buildPrimary1YearCompletion=(termReports={})=>{const terms=['Term 1','Term 2','Term 3'];const results=terms.map(term=>({term,complete:Boolean(termReports[term]?.complete),score:termReports[term]?.overallScore??null}));const completed=results.filter(x=>x.complete).length;return{className:'Primary 1',terms:results,completedTerms:completed,totalTerms:3,percentage:Math.round(completed/3*100),yearComplete:completed===3,nextClass:completed===3?'Primary 2':results.find(x=>!x.complete)?.term||'Term 1'};};
