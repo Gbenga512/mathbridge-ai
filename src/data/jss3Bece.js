@@ -1,0 +1,3 @@
+// BECE preparation configuration for JSS 3.
+export const JSS3_BECE_CONFIG={questionCount:20,timeLimitSeconds:30*60,passMark:50,title:'JSS 3 BECE Practice Assessment',instructions:['Answer 20 mixed Mathematics questions.','You have 30 minutes.','Questions cover number, algebra, geometry, statistics and probability.','Read each question carefully and manage your time.','Review difficult questions before finishing.']};
+export const buildBecePaper=(questions,shuffle)=>shuffle(questions.filter(q=>q.topic!=='BECE mixed revision'&&q.topic!=='BECE practice assessment')).slice(0,JSS3_BECE_CONFIG.questionCount);
