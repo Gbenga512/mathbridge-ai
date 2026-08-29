@@ -1,0 +1,6 @@
+// JSS 2 Mathematics curriculum. Builds directly on JSS 1 with a clear step up in difficulty.
+export const jss2TermMap={
+'Term 1':{label:'Term 1 • Number, Algebra and Commercial Arithmetic',topics:['Number bases and conversions','Fractions, decimals and percentages','Standard form','Approximation and error','Indices and laws of indices','Ratio, rate and proportion','Direct and inverse proportion','Profit, loss and discount','Simple interest and compound interest','Algebraic expressions and factorisation','Linear equations and inequalities']},
+'Term 2':{label:'Term 2 • Geometry, Mensuration and Graphs',topics:['Angles and parallel lines','Triangles and congruence','Quadrilaterals and polygons','Circle theorems basics','Perimeter and area','Surface area and volume','Pythagoras theorem','Bearings and scale drawing','Coordinates and straight-line graphs','Symmetry, reflection and rotation']},
+'Term 3':{label:'Term 3 • Statistics, Probability and Problem Solving',topics:['Data collection and frequency tables','Bar charts, histograms and pie charts','Mean, median, mode and range','Probability of combined events','Sequences and nth term','Algebraic word problems','Linear graphs and interpretation','Logical reasoning and sets','Revision and assessment']}
+};
