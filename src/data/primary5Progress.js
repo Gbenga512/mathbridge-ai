@@ -1,0 +1,4 @@
+// Primary 5 progress helpers. A topic is mastered at 80% or higher.
+export const createPrimary5Progress=()=>({className:'Primary 5',masteredTopics:[],topicResults:{}});
+export const recordPrimary5TopicResult=(progress,topic,correct,total)=>{const score=total?Math.round(correct/total*100):0;const old=progress.topicResults?.[topic]||{};const next={...progress,topicResults:{...progress.topicResults,[topic]:{correct,total,score,attempts:(old.attempts||0)+1}}};if(score>=80&&!next.masteredTopics.includes(topic))next.masteredTopics=[...next.masteredTopics,topic];return next;};
+export const getPrimary5ProgressSummary=(progress,topics=[])=>{const mastered=new Set(progress?.masteredTopics||[]);const done=topics.filter(t=>mastered.has(t)).length;return{masteredCount:done,totalTopics:topics.length,percentage:topics.length?Math.round(done/topics.length*100):0,complete:topics.length>0&&done===topics.length};};
