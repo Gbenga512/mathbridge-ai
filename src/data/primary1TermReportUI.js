@@ -1,0 +1,3 @@
+// Primary 1 learner-facing term report model.
+export const makeTermReport=(term,topics,mastered=[],scores={})=>{const rows=topics.map(topic=>({topic,score:scores[topic]??null,mastered:mastered.includes(topic)}));const weak=rows.filter(r=>r.score!==null&&r.score<80).sort((a,b)=>a.score-b.score);const complete=rows.length>0&&rows.every(r=>r.mastered);return{term,rows,weakPoints:weak,masteredCount:rows.filter(r=>r.mastered).length,total:rows.length,completion:rows.length?Math.round(rows.filter(r=>r.mastered).length/rows.length*100):0,complete,recommendation:weak.length?`Start with ${weak[0].topic}.`:'Keep revising to maintain mastery.'};};
+export const termReportLabels={complete:'Term Complete',inProgress:'Keep Learning',weak:'Needs More Practice'};
