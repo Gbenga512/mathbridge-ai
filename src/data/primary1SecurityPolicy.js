@@ -1,0 +1,3 @@
+// Primary 1 secure-access policy: deny unknown roles and prevent cross-user student access.
+export const primary1SecurityPolicy={default:'deny',roles:{student:['ownProgress','ownPractice'],parent:['linkedChildProgress'],teacher:['assignedClassProgress']}};
+export const isPrimary1AccessAllowed=(role,area,context={})=>{if(!primary1SecurityPolicy.roles[role]?.includes(area))return false;if(role==='student')return context.ownerId!=null&&context.requesterId===context.ownerId;if(role==='parent')return Boolean(context.linkedChildId&&context.requestedChildId===context.linkedChildId);if(role==='teacher')return Boolean(context.assignedClassId&&context.requestedClassId===context.assignedClassId);return false};
