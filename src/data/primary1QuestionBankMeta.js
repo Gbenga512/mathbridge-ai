@@ -1,0 +1,2 @@
+// Primary 1 question-bank coverage metadata.
+export const PRIMARY1_QUESTION_BANK_META={className:'Primary 1',subject:'Mathematics',terms:{'Term 1':['Counting and Number Recognition','Place Value','Addition','Subtraction','Patterns'],'Term 2':['Multiplication Concepts','Division Concepts','Fractions','Measurement','Money'],'Term 3':['Time','Geometry','Data Handling','Problem Solving','Revision and Assessment']},status:'seeded',nextBuild:'Expand each topic into lesson-level questions, answers and explanations'};
