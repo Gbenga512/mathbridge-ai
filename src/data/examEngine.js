@@ -1,0 +1,3 @@
+export const createExam=(questions,durationMinutes=60)=>({id:`exam-${Date.now()}`,questions:[...questions],durationSeconds:durationMinutes*60,startedAt:new Date().toISOString(),answers:{}});
+export const submitExam=(exam,answers)=>{const results=exam.questions.map((q,i)=>({question:q,selected:answers?.[i],isCorrect:answers?.[i]===q.answer}));const correct=results.filter(r=>r.isCorrect).length;const total=results.length;return{examId:exam.id,correct,total,percentage:total?Math.round(correct/total*100):0,results,submittedAt:new Date().toISOString()}};
+export const getExamTimeRemaining=(exam,now=Date.now())=>Math.max(0,exam.durationSeconds-Math.floor((now-new Date(exam.startedAt).getTime())/1000));
