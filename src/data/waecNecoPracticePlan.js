@@ -1,0 +1,2 @@
+export const EXAM_REVISION_PLAN={Algebra:['Linear equations','Quadratic equations','Sequences and series'],Trigonometry:['Sine rule','Cosine rule','Trigonometric ratios'],Statistics:['Mean and median','Probability','Data interpretation'],'Coordinate Geometry':['Gradient','Midpoint','Distance between points'],Probability:['Basic probability','Combined events','Expected outcomes']};
+export const getRevisionPlan=weakTopics=>weakTopics.flatMap(topic=>(EXAM_REVISION_PLAN[topic]||[`${topic} fundamentals`]).map(item=>({topic,focus:item,questions:10})));
