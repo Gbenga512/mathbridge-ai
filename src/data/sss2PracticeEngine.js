@@ -1,0 +1,4 @@
+import{getAllSSS2PracticeQuestions,getSSS2PracticeQuestions}from'./sss2Practice';
+export const createSSS2PracticeSet=(topic,count=10)=>{const pool=topic?getSSS2PracticeQuestions(topic):getAllSSS2PracticeQuestions();return[...pool].sort(()=>Math.random()-.5).slice(0,count)};
+export const scoreSSS2Practice=(questions,answers)=>{const correct=questions.reduce((n,q,i)=>n+(answers[i]===q.answer?1:0),0);const total=questions.length;const percentage=total?Math.round(correct/total*100):0;return{correct,total,percentage,passed:percentage>=60,mistakes:questions.filter((q,i)=>answers[i]!==q.answer),review:questions.map((q,i)=>({question:q.q,selected:answers[i],correct:q.answer,isCorrect:answers[i]===q.answer}))}};
+export const getSSS2PracticeFeedback=p=>p>=80?'Excellent — move to challenge questions.':p>=60?'Good progress — review your missed questions.':'Review the lesson and practise again.';
