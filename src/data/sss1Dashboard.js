@@ -1,0 +1,3 @@
+import{SSS1_TOPICS}from'./sss1Curriculum';
+export const buildSSS1Dashboard=(mastery={},history=[])=>{const rows=SSS1_TOPICS.map(topic=>({topic,...(mastery[topic]||{percentage:0,best:0,attempts:0,status:'Not Started',trend:'steady'})}));const weakest=[...rows].sort((a,b)=>a.percentage-b.percentage)[0];const average=rows.length?Math.round(rows.reduce((s,x)=>s+x.percentage,0)/rows.length):0;const mastered=rows.filter(x=>x.percentage>=80).length;return{average,mastered,totalTopics:rows.length,weakest,recent:history.slice(0,5),topics:rows}};
+export const getSSS1NextAction=d=>d.weakest?.percentage<60?'Review '+d.weakest.topic:d.weakest?.percentage<80?'Practise '+d.weakest.topic:'Challenge '+d.weakest.topic;
