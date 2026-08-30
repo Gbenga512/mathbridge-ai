@@ -1,6 +1,10 @@
-export const startCbtSession=(exam,questions,durationMinutes)=>({exam,questions,currentIndex:0,answers:{},flagged:{},startedAt:Date.now(),durationSeconds:durationMinutes*60,submitted:false});
-export const answerCbtQuestion=(session,index,answer)=>({...session,answers:{...session.answers,[index]:answer}});
-export const toggleCbtFlag=(session,index)=>({...session,flagged:{...session.flagged,[index]:!session.flagged[index]}});
-export const moveCbtQuestion=(session,index)=>({...session,currentIndex:Math.max(0,Math.min(index,session.questions.length-1))});
+const KEY='mathbridge-active-cbt';
+export const startCbtSession=(exam,questions,durationMinutes)=>{const session={exam,questions,currentIndex:0,answers:{},flagged:{},startedAt:Date.now(),durationSeconds:durationMinutes*60,submitted:false};try{localStorage.setItem(KEY,JSON.stringify(session))}catch{}return session};
+const persist=s=>{try{localStorage.setItem(KEY,JSON.stringify(s))}catch{}return s};
+export const answerCbtQuestion=(session,index,answer)=>persist({...session,answers:{...session.answers,[index]:answer}});
+export const toggleCbtFlag=(session,index)=>persist({...session,flagged:{...session.flagged,[index]:!session.flagged[index]}});
+export const moveCbtQuestion=(session,index)=>persist({...session,currentIndex:Math.max(0,Math.min(index,session.questions.length-1))});
 export const getCbtTimeRemaining=(session,now=Date.now())=>Math.max(0,session.durationSeconds-Math.floor((now-session.startedAt)/1000));
 export const isCbtComplete=(session)=>Object.keys(session.answers).length===session.questions.length;
+export const loadActiveCbtSession=()=>{try{const s=JSON.parse(localStorage.getItem(KEY)||'null');return s&&s.questions?.length&&getCbtTimeRemaining(s)>0?s:null}catch{return null}};
+export const clearActiveCbtSession=()=>{try{localStorage.removeItem(KEY)}catch{}};
