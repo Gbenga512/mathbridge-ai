@@ -1,0 +1,3 @@
+export const buildSSS1PracticeSession=(topic,questions)=>({topic,questions:questions.map((q,index)=>({...q,number:index+1})),total:questions.length});
+export const buildSSS1Result=(questions,answers)=>{const correct=questions.reduce((n,q,i)=>n+(answers[i]===q.answer?1:0),0);const percentage=questions.length?Math.round(correct/questions.length*100):0;return{correct,total:questions.length,percentage,passed:percentage>=60,review:questions.map((q,i)=>({question:q.q,selected:answers[i],correct:q.answer,isCorrect:answers[i]===q.answer}))}};
+export const getSSS1ResultAction=p=>p>=80?'Challenge this topic':p>=60?'Practise missed questions':'Review the lesson and retry';
