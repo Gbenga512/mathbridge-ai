@@ -1,0 +1,12 @@
+export const SSS1_LEARNING={
+'Sets':{title:'Sets',teach:'A set is a well-defined collection of objects. We can describe sets by listing their members or by stating a rule.',example:'If A = {1, 2, 3} and B = {3, 4}, then A ∩ B = {3}.',tip:'Remember: intersection means the elements common to both sets.'},
+'Indices':{title:'Indices',teach:'Indices are powers. When multiplying powers with the same base, add the indices: aᵐ × aⁿ = aᵐ⁺ⁿ.',example:'2³ × 2² = 2⁵ = 32.',tip:'Same base + multiplication → add powers.'},
+'Logarithms':{title:'Logarithms',teach:'A logarithm tells you the power to which a base must be raised to obtain a number.',example:'log₁₀(1000) = 3 because 10³ = 1000.',tip:'Convert a log statement into an index statement when unsure.'},
+'Surds':{title:'Surds',teach:'A surd is an irrational root that cannot be simplified to a whole number. Look for square factors inside the root.',example:'√50 = √(25×2) = 5√2.',tip:'Take perfect-square factors outside the root.'},
+'Quadratic Equations':{title:'Quadratic Equations',teach:'A quadratic equation has the form ax² + bx + c = 0. Factorisation is one way to solve it.',example:'x² − 5x + 6 = (x−2)(x−3).',tip:'Look for two numbers whose product is c and sum is b.'},
+'Coordinate Geometry':{title:'Coordinate Geometry',teach:'Coordinates locate points on the Cartesian plane. The midpoint averages the x-coordinates and the y-coordinates.',example:'The midpoint of (2,4) and (6,8) is ((2+6)/2,(4+8)/2) = (4,6).',tip:'Average corresponding coordinates.'},
+'Trigonometry':{title:'Trigonometry',teach:'In a right-angled triangle, SOH-CAH-TOA helps identify sine, cosine and tangent.',example:'sin θ = opposite/hypotenuse.',tip:'Start by labelling the opposite, adjacent and hypotenuse sides.'},
+'Sequences and Series':{title:'Sequences and Series',teach:'A sequence is an ordered list of numbers. In an arithmetic sequence, consecutive terms have a constant difference.',example:'3, 6, 9, 12 has common difference 3, so the next term is 15.',tip:'Check the difference between consecutive terms first.'},
+'Statistics':{title:'Statistics',teach:'The mean is found by adding all observations and dividing by the number of observations.',example:'The mean of 4, 6 and 8 is 18/3 = 6.',tip:'Sum first, then divide by how many values there are.'},
+'Probability':{title:'Probability',teach:'For equally likely outcomes, probability equals favourable outcomes divided by total possible outcomes.',example:'For a fair die, P(6) = 1/6.',tip:'Probability is always between 0 and 1.'}
+};
