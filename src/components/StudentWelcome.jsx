@@ -1,0 +1,2 @@
+import React from 'react';
+export default function StudentWelcome({profile,onContinue}){if(!profile?.name)return null;return <section className="report student-welcome"><p className="step">WELCOME BACK</p><h2>Hi, {profile.name}! 👋</h2><p>You are studying <b>{profile.level}</b>. Your MathBridge progress is saved on this device.</p>{profile.lastActiveAt&&<small>Last active: {new Date(profile.lastActiveAt).toLocaleDateString()}</small>}{onContinue&&<button className="primary" onClick={onContinue}>Continue Learning →</button>}</section>}
