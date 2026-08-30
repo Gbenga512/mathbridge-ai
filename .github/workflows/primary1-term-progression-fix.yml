@@ -17,36 +17,37 @@ jobs:
         run: |
           python - <<'PY'
           from pathlib import Path
-          import re
-
           p = Path('src/main_term.jsx')
           s = p.read_text()
 
           old = "const nextClass=()=>className==='Primary 1'?'Primary 2':className==='Primary 2'?'Primary 3':className==='Primary 3'?'Primary 4':className==='Primary 4'?'Primary 5':className==='Primary 5'?'Primary 6':className==='Primary 6'?'JSS 1':className==='JSS 1'?'JSS 2':className==='JSS 2'?'JSS 3':null;const complete=summary.complete;"
           new = "const nextClass=()=>className==='Primary 1'?'Primary 2':className==='Primary 2'?'Primary 3':className==='Primary 3'?'Primary 4':className==='Primary 4'?'Primary 5':className==='Primary 5'?'Primary 6':className==='Primary 6'?'JSS 1':className==='JSS 1'?'JSS 2':className==='JSS 2'?'JSS 3':null;const termKeys=Object.keys(terms),termIndex=termKeys.indexOf(term),nextTerm=termIndex>=0&&termIndex<termKeys.length-1?termKeys[termIndex+1]:null;const complete=summary.complete;"
-          if old not in s:
-              raise SystemExit('Expected progression anchor not found')
-          s=s.replace(old,new,1)
+          if old in s:
+              s=s.replace(old,new,1)
 
           old_cert = "{screen==='certificate'&&<main className=\"result\"><div className=\"badge\">🏆</div><p className=\"step\">COMPLETION</p><h2>{className} Mathematics Completed</h2><div className=\"report\"><p>Well done! You have mastered all topics at the required 80% level.</p><p><b>Next stage:</b> {nextClass()||'End of current MathBridge curriculum'}</p></div>{nextClass()&&<button className=\"primary\" onClick={()=>{const n=nextClass();setClassName(n);setLevel(n.startsWith('Primary')?'Primary':'JSS');setTerm('Term 1');setScreen('home')}}>Continue to next class →</button>}<button className=\"secondary\" onClick={()=>setScreen('home')}>Back to curriculum</button></main>}"
           new_cert = "{screen==='certificate'&&<main className=\"result\"><div className=\"badge\">🏆</div><p className=\"step\">{nextTerm?'TERM COMPLETION':'CLASS COMPLETION'}</p><h2>{nextTerm?`${className} ${terms[term]?.label||term} Completed`:`${className} Mathematics Completed`}</h2><div className=\"report\"><p>{nextTerm?'Well done! You have completed this term at the required 80% level.':'Well done! You have mastered all topics in this class at the required 80% level.'}</p><p><b>Next stage:</b> {nextTerm?(terms[nextTerm]?.label||nextTerm):(nextClass()||'End of current MathBridge curriculum')}</p></div>{nextTerm?<button className=\"primary\" onClick={()=>{setTerm(nextTerm);setScreen('home')}}>Continue to next term →</button>:nextClass()&&<button className=\"primary\" onClick={()=>{const n=nextClass();setClassName(n);setLevel(n.startsWith('Primary')?'Primary':'JSS');setTerm('Term 1');setScreen('home')}}>Continue to next class →</button>}<button className=\"secondary\" onClick={()=>setScreen('home')}>Back to curriculum</button></main>}"
-          if old_cert not in s:
-              raise SystemExit('Expected certificate block not found')
-          s=s.replace(old_cert,new_cert,1)
+          if old_cert in s:
+              s=s.replace(old_cert,new_cert,1)
 
           old_button = "{complete&&<button className=\"primary\" onClick={()=>setScreen('certificate')}>🏆 View Completion Certificate →</button>}"
           new_button = "{complete&&<button className=\"primary\" onClick={()=>setScreen('certificate')}>{nextTerm?'🏆 View Term Completion →':'🏆 View Class Completion Certificate →'}</button>}"
-          if old_button not in s:
-              raise SystemExit('Expected completion button not found')
-          s=s.replace(old_button,new_button,1)
+          if old_button in s:
+              s=s.replace(old_button,new_button,1)
 
           p.write_text(s)
-          print('Primary term progression patch applied.')
+          print('Primary term progression patch applied or already present.')
           PY
       - name: Verify patch
         run: |
-          grep -q "nextTerm=termIndex>=0&&termIndex<termKeys.length-1?termKeys[termIndex+1]:null" src/main_term.jsx
-          grep -q "Continue to next term" src/main_term.jsx
+          python - <<'PY'
+          from pathlib import Path
+          s=Path('src/main_term.jsx').read_text()
+          assert 'nextTerm=' in s
+          assert 'TERM COMPLETION' in s
+          assert 'Continue to next term' in s
+          print('Verified term-by-term progression fix.')
+          PY
       - name: Commit patch
         run: |
           git config user.name "github-actions[bot]"
