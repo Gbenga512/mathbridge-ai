@@ -1,0 +1,4 @@
+const KEY='mathbridge-sss2-mastery';
+export const loadSSS2Mastery=()=>{try{return JSON.parse(localStorage.getItem(KEY)||'{}')}catch{return{}}};
+export const updateSSS2Mastery=(topic,percentage)=>{const current=loadSSS2Mastery();const previous=current[topic]?.percentage||0;const attempts=current[topic]?.attempts||0;const next={...current,[topic]:{percentage,attempts:attempts+1,best:Math.max(current[topic]?.best||0,percentage),status:percentage>=80?'Mastered':percentage>=60?'Developing':'Needs Practice',trend:percentage>previous?'up':percentage<previous?'down':'steady'}};localStorage.setItem(KEY,JSON.stringify(next));return next};
+export const getSSS2MasterySummary=mastery=>{const values=Object.values(mastery);return{topics:values.length,mastered:values.filter(x=>x.status==='Mastered').length,average:values.length?Math.round(values.reduce((s,x)=>s+x.percentage,0)/values.length):0}};
