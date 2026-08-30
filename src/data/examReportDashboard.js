@@ -1,0 +1,3 @@
+import{loadExamReports}from'./examReportStorage';
+export const getExamDashboardData=()=>{const reports=loadExamReports();if(!reports.length)return{attempts:0,average:0,best:0,latest:null,weakTopics:[]};const scores=reports.map(r=>r.percentage||0);const latest=reports[0];const weak=[...new Set(reports.flatMap(r=>r.weakTopics||[]))];return{attempts:reports.length,average:Math.round(scores.reduce((a,b)=>a+b,0)/scores.length),best:Math.max(...scores),latest,weakTopics:weak.slice(0,8)}};
+export const getExamTrend=()=>loadExamReports().slice().reverse().map(r=>({date:r.submittedAt,percentage:r.percentage,grade:r.grade}));
