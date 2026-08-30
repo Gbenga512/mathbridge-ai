@@ -1,0 +1,12 @@
+export const SSS1_LESSONS={
+  Sets:{title:'Sets',teach:'A set is a well-defined collection of objects. We describe sets using words, listing, or set-builder notation.',example:'If A={1,2,3} and B={3,4,5}, then A∩B={3} and A∪B={1,2,3,4,5}.',tip:'Remember: ∩ means AND/common elements; ∪ means OR/all elements.'},
+  Indices:{title:'Indices',teach:'Indices are powers. The laws of indices help simplify expressions involving multiplication, division and powers.',example:'a^m × a^n = a^(m+n). Therefore 2^3 × 2^2 = 2^5 = 32.',tip:'When multiplying the same base, add the powers.'},
+  Logarithms:{title:'Logarithms',teach:'A logarithm tells you the power to which a base must be raised to obtain a number.',example:'log₂8=3 because 2³=8.',tip:'Convert log form to index form when unsure.'},
+  Surds:{title:'Surds',teach:'A surd is an irrational root that cannot be simplified to a rational number.',example:'√50=√(25×2)=5√2.',tip:'Look for perfect-square factors inside the root.'},
+  'Quadratic Equations':{title:'Quadratic Equations',teach:'A quadratic equation has the form ax²+bx+c=0, where a is not zero.',example:'x²−5x+6=0 factors as (x−2)(x−3)=0, so x=2 or 3.',tip:'Try factorisation first; use the quadratic formula when needed.'},
+  'Coordinate Geometry':{title:'Coordinate Geometry',teach:'Coordinate geometry uses points and algebra to study lines and shapes on a plane.',example:'The midpoint of (2,4) and (6,8) is ((2+6)/2,(4+8)/2)=(4,6).',tip:'Keep x-coordinates together and y-coordinates together.'},
+  Trigonometry:{title:'Trigonometry',teach:'Trigonometry relates angles to sides of triangles using ratios such as sine, cosine and tangent.',example:'In a right triangle, tan θ = opposite/adjacent.',tip:'SOH-CAH-TOA is a useful memory aid.'},
+  'Sequences and Series':{title:'Sequences and Series',teach:'A sequence is an ordered list of numbers. A series is the sum of terms in a sequence.',example:'2,5,8,11 is arithmetic with common difference 3.',tip:'Find the common difference before choosing a formula.'},
+  Statistics:{title:'Statistics',teach:'Statistics involves collecting, organising and interpreting data.',example:'For 2,4,6,8, the mean is (2+4+6+8)/4=5.',tip:'Always check the number of observations before calculating the mean.'},
+  Probability:{title:'Probability',teach:'Probability measures how likely an event is to occur, from 0 (impossible) to 1 (certain).',example:'For a fair die, P(rolling a 6)=1/6.',tip:'Probability = favourable outcomes ÷ total equally likely outcomes.'}
+};
