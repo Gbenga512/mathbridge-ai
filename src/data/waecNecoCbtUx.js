@@ -1,0 +1,3 @@
+export const CBT_NAVIGATION={labels:{previous:'Previous',next:'Next',flag:'Flag for review',unflag:'Remove flag',submit:'Submit exam'},status:{answered:'Answered',unanswered:'Unanswered',flagged:'Flagged'}};
+export const getCbtProgress=(session)=>{const total=session?.questions?.length||0;const answered=Object.keys(session?.answers||{}).length;const flagged=Object.values(session?.flagged||{}).filter(Boolean).length;return{total,answered,unanswered:Math.max(0,total-answered),flagged,percentage:total?Math.round(answered/total*100):0}};
+export const canSubmitCbt=session=>Boolean(session?.questions?.length);
