@@ -6,7 +6,7 @@ export const SSS3_PRACTICE={
 {id:'s3-alg-4',topic:'Advanced Algebra',q:'If 3x−2>7, then:',options:['x>3','x>5/3','x<3','x<5/3'],answer:0,difficulty:'Medium',explanation:'3x>9, hence x>3.'},
 {id:'s3-alg-5',topic:'Advanced Algebra',q:'The roots of x²−7x+10=0 are:',options:['1 and 10','2 and 5','−2 and −5','3 and 4'],answer:1,difficulty:'Hard',explanation:'(x−2)(x−5)=0.'}],
 'Functions and Graphs':[
-{id:'s3-fn-1',topic:'Functions and Graphs',q:'If f(x)=x²+1, find f(3).',options:['7','8','9','10'],answer:1,difficulty:'Easy',explanation:'3²+1=10. Correction: 9+1=10, so the correct option is 10.',},
+{id:'s3-fn-1',topic:'Functions and Graphs',q:'If f(x)=x²+1, find f(3).',options:['7','8','9','10'],answer:3,difficulty:'Easy',explanation:'3²+1=10.'},
 {id:'s3-fn-2',topic:'Functions and Graphs',q:'For f(x)=2x−1, f(4)=',options:['6','7','8','9'],answer:1,difficulty:'Easy',explanation:'2(4)−1=7.'},
 {id:'s3-fn-3',topic:'Functions and Graphs',q:'The gradient of y=3x+2 is:',options:['2','3','−2','−3'],answer:1,difficulty:'Medium',explanation:'In y=mx+c, m is the gradient.'},
 {id:'s3-fn-4',topic:'Functions and Graphs',q:'The vertex of y=(x−2)²+3 is:',options:['(−2,3)','(2,−3)','(2,3)','(−2,−3)'],answer:2,difficulty:'Medium',explanation:'Vertex form is y=(x−h)²+k.'},
