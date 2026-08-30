@@ -1,128 +1,17 @@
 import React,{useMemo,useState}from'react';
-import{SSS1_CURRICULUM}from'./data/sss1Curriculum';
-import{SSS1_LESSONS}from'./data/sss1Lessons';
-import{getAllSSS1PracticeQuestions}from'./data/sss1Practice';
-import{SSS2_CURRICULUM}from'./data/sss2Curriculum';
-import{SSS2_LESSONS}from'./data/sss2Lessons';
-import{getAllSSS2PracticeQuestions}from'./data/sss2Practice';
-import{SSS3_CURRICULUM}from'./data/sss3Curriculum';
-import{SSS3_LESSONS}from'./data/sss3Lessons';
-import{getAllSSS3PracticeQuestions}from'./data/sss3Practice';
-import{SSS3_CBT_LAUNCHER}from'./data/sss3CbtLauncher';
-import WAECNECOCBT from'./WAECNECOCBT';
-
-const data={
-  SSS1:{label:'SSS 1',curriculum:SSS1_CURRICULUM,lessons:SSS1_LESSONS,questions:getAllSSS1PracticeQuestions()},
-  SSS2:{label:'SSS 2',curriculum:SSS2_CURRICULUM,lessons:SSS2_LESSONS,questions:getAllSSS2PracticeQuestions()},
-  SSS3:{label:'SSS 3',curriculum:SSS3_CURRICULUM,lessons:SSS3_LESSONS,questions:getAllSSS3PracticeQuestions()}
-};
-
+import{SSS1_CURRICULUM}from'./data/sss1Curriculum';import{SSS1_LESSONS}from'./data/sss1Lessons';import{getAllSSS1PracticeQuestions}from'./data/sss1Practice';
+import{SSS2_CURRICULUM}from'./data/sss2Curriculum';import{SSS2_LESSONS}from'./data/sss2Lessons';import{getAllSSS2PracticeQuestions}from'./data/sss2Practice';
+import{SSS3_CURRICULUM}from'./data/sss3Curriculum';import{SSS3_LESSONS}from'./data/sss3Lessons';import{getAllSSS3PracticeQuestions}from'./data/sss3Practice';import{SSS3_CBT_LAUNCHER}from'./data/sss3CbtLauncher';import WAECNECOCBT from'./WAECNECOCBT';
+const data={SSS1:{label:'SSS 1',curriculum:SSS1_CURRICULUM,lessons:SSS1_LESSONS,questions:getAllSSS1PracticeQuestions()},SSS2:{label:'SSS 2',curriculum:SSS2_CURRICULUM,lessons:SSS2_LESSONS,questions:getAllSSS2PracticeQuestions()},SSS3:{label:'SSS 3',curriculum:SSS3_CURRICULUM,lessons:SSS3_LESSONS,questions:getAllSSS3PracticeQuestions()}};
 export default function SSSPortal({level='SSS1',onBack}){
-  const cfg=data[level]||data.SSS1;
-  const terms=Object.keys(cfg.curriculum||{});
-  const[term,setTerm]=useState(terms[0]||'Term 1');
-  const[topic,setTopic]=useState(null);
-  const[showPractice,setShowPractice]=useState(false);
-  const[qIndex,setQIndex]=useState(0);
-  const[selected,setSelected]=useState(null);
-  const[correct,setCorrect]=useState(0);
-  const[done,setDone]=useState(false);
-  const[showExams,setShowExams]=useState(false);
-  const[activeExam,setActiveExam]=useState(null);
-  const currentTerm=cfg.curriculum?.[term]||{topics:[]};
-  const topics=currentTerm.topics||[];
-  const pool=useMemo(()=>cfg.questions.filter(q=>topics.includes(q.topic)),[cfg,topics]);
-  const lesson=topic?cfg.lessons?.[topic]:null;
-  const topicPool=topic?cfg.questions.filter(q=>q.topic===topic):[];
-  const q=pool[qIndex];
-
-  const resetPractice=(t)=>{
-    setTopic(t);
-    setShowPractice(true);
-    setQIndex(0);
-    setSelected(null);
-    setCorrect(0);
-    setDone(false);
-  };
-  const openTopic=t=>{
-    setTopic(t);
-    setShowPractice(false);
-    setQIndex(0);
-    setSelected(null);
-    setCorrect(0);
-    setDone(false);
-  };
-  const answer=n=>{
-    if(selected!==null||!q)return;
-    setSelected(n);
-    if(n===q.answer)setCorrect(x=>x+1);
-  };
-  const next=()=>{
-    if(selected===null)return;
-    if(qIndex<pool.length-1){setQIndex(x=>x+1);setSelected(null)}else setDone(true);
-  };
-
-  if(activeExam&&level==='SSS3')return <WAECNECOCBT/>;
-  if(level==='SSS3'&&showExams)return <main className="dashboard">
-    <button className="secondary" onClick={()=>setShowExams(false)}>← SSS 3</button>
-    <div className="report"><p className="step">EXAMINATION CENTRE</p><h2>{SSS3_CBT_LAUNCHER.title}</h2><p>{SSS3_CBT_LAUNCHER.subtitle}</p>
-      <div className="topic-results">{SSS3_CBT_LAUNCHER.exams.map(e=><div key={e.id}><span><strong>{e.label}</strong><br/>{e.questions} questions · {e.duration}</span><button className="primary" onClick={()=>setActiveExam(e.id)}>Start {e.id} CBT →</button></div>)}</div>
-    </div>
-  </main>;
-
-  return <main className="dashboard">
-    <div className="dashhead">
-      <div><p className="step">SENIOR SECONDARY MATHEMATICS</p><h2>{cfg.label} Learning Centre</h2><p className="leveltext">Learn, practise and build mastery.</p></div>
-      <button className="secondary" onClick={onBack}>← Back</button>
-    </div>
-
-    {level==='SSS3'&&!topic&&!done&&<button className="primary" onClick={()=>setShowExams(true)}>🎓 WAEC / NECO Examination Centre →</button>}
-
-    {!topic&&!done&&<>
-      <div className="term-strip">{terms.map(t=><button key={t} className={term===t?'current':'locked'} onClick={()=>{setTerm(t);setTopic(null);setShowPractice(false);setDone(false)}}>{t}</button>)}</div>
-      <div className="report">
-        <h3>{currentTerm.label||term}</h3>
-        <p>Choose a topic below. Every topic has a lesson and a dedicated practice set.</p>
-        <div className="topic-results">
-          {topics.map(t=>{
-            const count=cfg.questions.filter(qx=>qx.topic===t).length;
-            return <div key={t} className="sss-topic-row">
-              <span><strong>{t}</strong><br/><small>{count} practice question{count===1?'':'s'}</small></span>
-              <span className="sss-topic-actions"><button className="secondary" onClick={()=>openTopic(t)}>Learn →</button><button className="primary" onClick={()=>resetPractice(t)} disabled={!count}>Practise →</button></span>
-            </div>;
-          })}
-        </div>
-      </div>
-      <div className="report sss-practice-overview">
-        <p className="step">PRACTICE CENTRE</p>
-        <h3>SSS 1 Practice</h3>
-        <p>{pool.length} practice questions are available for {term}. Select <b>Practise →</b> beside any topic to begin.</p>
-        <div className="sss-practice-grid">{topics.map(t=><button key={t} className="secondary" onClick={()=>resetPractice(t)} disabled={!cfg.questions.some(qx=>qx.topic===t)}>📝 {t} Practice</button>)}</div>
-      </div>
-    </>}
-
-    {topic&&!done&&!showPractice&&<>
-      <button className="secondary" onClick={()=>setTopic(null)}>← Topics</button>
-      <div className="report">
-        <div className="pill">📖 {cfg.label} • {topic}</div>
-        <h3>{lesson?.teach||'Study this topic carefully and work through examples.'}</h3>
-        <div className="formula"><small>WORKED EXAMPLE</small><strong>{lesson?.example||'Work through a representative problem step by step.'}</strong><p>💡 {lesson?.tip||'Write each step clearly and check your answer.'}</p></div>
-        <p><b>{topicPool.length}</b> practice questions available.</p>
-        <button className="primary" onClick={()=>resetPractice(topic)} disabled={!topicPool.length}>Start Practice →</button>
-      </div>
-    </>}
-
-    {topic&&showPractice&&!done&&pool.length>0&&<div className="report">
-      <button className="secondary" onClick={()=>setShowPractice(false)}>← Lesson</button>
-      <p className="step">PRACTICE QUESTION {qIndex+1} OF {pool.length}</p>
-      <div className="pill">📝 {cfg.label} • {q?.topic}</div>
-      <h3>{q?.q}</h3>
-      <div className="answers">{q?.options.map((x,n)=><button key={`${q.id}-${n}`} className={selected===n?'selected-answer':''} onClick={()=>answer(n)}>{x}<span>{selected===n?'✓':'→'}</span></button>)}</div>
-      <button className="primary" onClick={next} disabled={selected===null}>{qIndex===pool.length-1?'Finish Practice':'Next →'}</button>
-    </div>}
-
-    {topic&&showPractice&&!done&&pool.length===0&&<div className="report"><button className="secondary" onClick={()=>setShowPractice(false)}>← Lesson</button><h3>Practice is being prepared</h3><p>There are currently no questions for this topic. Please check another topic.</p></div>}
-
-    {done&&<div className="report"><div className="badge">{pool.length&&correct/pool.length>=.8?'🏆':'📚'}</div><h3>Practice complete</h3><div className="score"><strong>{pool.length?Math.round(correct/pool.length*100):0}%</strong><span>{correct} of {pool.length} correct</span></div><p>{pool.length&&correct/pool.length>=.8?'Excellent. You are ready for a harder challenge.':'Review the lesson and practise the missed areas again.'}</p><button className="primary" onClick={()=>resetPractice(topic)}>Try Again →</button></div>}
-  </main>;
+ const cfg=data[level]||data.SSS1;const terms=Object.keys(cfg.curriculum||{});const[term,setTerm]=useState(terms[0]||'Term 1');const[topic,setTopic]=useState(null);const[showPractice,setShowPractice]=useState(false);const[qIndex,setQIndex]=useState(0);const[selected,setSelected]=useState(null);const[correct,setCorrect]=useState(0);const[done,setDone]=useState(false);const[showExams,setShowExams]=useState(false);const[activeExam,setActiveExam]=useState(null);const currentTerm=cfg.curriculum?.[term]||{topics:[]};const topics=currentTerm.topics||[];
+ const topicPool=useMemo(()=>topic?cfg.questions.filter(q=>q.topic===topic):[],[cfg,topic]);const termPool=useMemo(()=>cfg.questions.filter(q=>topics.includes(q.topic)),[cfg,topics]);const pool=topicPool;const lesson=topic?cfg.lessons?.[topic]:null;const q=pool[qIndex];
+ const resetPractice=t=>{setTopic(t);setShowPractice(true);setQIndex(0);setSelected(null);setCorrect(0);setDone(false)};const openTopic=t=>{setTopic(t);setShowPractice(false);setQIndex(0);setSelected(null);setCorrect(0);setDone(false)};const answer=n=>{if(selected!==null||!q)return;setSelected(n);if(n===q.answer)setCorrect(x=>x+1)};const next=()=>{if(selected===null)return;if(qIndex<pool.length-1){setQIndex(x=>x+1);setSelected(null)}else setDone(true)};
+ if(activeExam&&level==='SSS3')return <WAECNECOCBT/>;if(level==='SSS3'&&showExams)return <main className="dashboard"><button className="secondary" onClick={()=>setShowExams(false)}>← SSS 3</button><div className="report"><p className="step">EXAMINATION CENTRE</p><h2>{SSS3_CBT_LAUNCHER.title}</h2><p>{SSS3_CBT_LAUNCHER.subtitle}</p><div className="topic-results">{SSS3_CBT_LAUNCHER.exams.map(e=><div key={e.id}><span><strong>{e.label}</strong><br/>{e.questions} questions · {e.duration}</span><button className="primary" onClick={()=>setActiveExam(e.id)}>Start {e.id} CBT →</button></div>)}</div></div></main>;
+ return <main className="dashboard"><div className="dashhead"><div><p className="step">SENIOR SECONDARY MATHEMATICS</p><h2>{cfg.label} Learning Centre</h2><p className="leveltext">Learn, practise and build mastery.</p></div><button className="secondary" onClick={onBack}>← Back</button></div>{level==='SSS3'&&!topic&&!done&&<button className="primary" onClick={()=>setShowExams(true)}>🎓 WAEC / NECO Examination Centre →</button>}
+ {!topic&&!done&&<><div className="term-strip">{terms.map(t=><button key={t} className={term===t?'current':'locked'} onClick={()=>{setTerm(t);setTopic(null);setShowPractice(false);setDone(false)}}>{t}</button>)}</div><div className="report"><h3>{currentTerm.label||term}</h3><p>Choose a topic below. Every topic has a lesson and a dedicated practice set.</p><div className="topic-results">{topics.map(t=>{const count=cfg.questions.filter(qx=>qx.topic===t).length;return <div key={t} className="sss-topic-row"><span><strong>{t}</strong><br/><small>{count} practice question{count===1?'':'s'}</small></span><span className="sss-topic-actions"><button className="secondary" onClick={()=>openTopic(t)}>Learn →</button><button className="primary" onClick={()=>resetPractice(t)} disabled={!count}>Practise →</button></span></div>})}</div></div><div className="report sss-practice-overview"><p className="step">PRACTICE CENTRE</p><h3>{cfg.label} Practice</h3><p>{termPool.length} practice questions are available for {term}. Select <b>Practise →</b> beside any topic to begin.</p><div className="sss-practice-grid">{topics.map(t=><button key={t} className="secondary" onClick={()=>resetPractice(t)} disabled={!cfg.questions.some(qx=>qx.topic===t)}>📝 {t} Practice</button>)}</div></div></>}
+ {topic&&!done&&!showPractice&&<><button className="secondary" onClick={()=>setTopic(null)}>← Topics</button><div className="report"><div className="pill">📖 {cfg.label} • {topic}</div><h3>{lesson?.teach||'Study this topic carefully and work through examples.'}</h3><div className="formula"><small>WORKED EXAMPLE</small><strong>{lesson?.example||'Work through a representative problem step by step.'}</strong><p>💡 {lesson?.tip||'Write each step clearly and check your answer.'}</p></div><p><b>{topicPool.length}</b> practice questions available.</p><button className="primary" onClick={()=>resetPractice(topic)} disabled={!topicPool.length}>Start Practice →</button></div></>}
+ {topic&&showPractice&&!done&&pool.length>0&&<div className="report"><button className="secondary" onClick={()=>setShowPractice(false)}>← Lesson</button><p className="step">PRACTICE QUESTION {qIndex+1} OF {pool.length}</p><div className="pill">📝 {cfg.label} • {topic}</div><h3>{q?.q}</h3><div className="answers">{q?.options.map((x,n)=><button key={`${q.id}-${n}`} className={selected===n?'selected-answer':''} onClick={()=>answer(n)}>{x}<span>{selected===n?'✓':'→'}</span></button>)}</div><button className="primary" onClick={next} disabled={selected===null}>{qIndex===pool.length-1?'Finish Practice':'Next →'}</button></div>}
+ {topic&&showPractice&&!done&&pool.length===0&&<div className="report"><button className="secondary" onClick={()=>setShowPractice(false)}>← Lesson</button><h3>Practice is being prepared</h3><p>There are currently no questions for this topic. Please check another topic.</p></div>}
+ {done&&<div className="report"><div className="badge">{pool.length&&correct/pool.length>=.8?'🏆':'📚'}</div><h3>Practice complete</h3><div className="score"><strong>{pool.length?Math.round(correct/pool.length*100):0}%</strong><span>{correct} of {pool.length} correct</span></div><p>{pool.length&&correct/pool.length>=.8?'Excellent. You are ready for a harder challenge.':'Review the lesson and practise the missed areas again.'}</p><button className="primary" onClick={()=>resetPractice(topic)}>Try Again →</button></div>}</main>;
 }
