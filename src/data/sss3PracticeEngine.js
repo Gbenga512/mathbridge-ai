@@ -1,0 +1,3 @@
+export const scoreSSS3Practice=(questions,answers)=>{const results=questions.map((q,i)=>({question:q,selected:answers?.[i],isCorrect:answers?.[i]===q.answer}));const correct=results.filter(r=>r.isCorrect).length;const total=questions.length;const percentage=total?Math.round(correct/total*100):0;return{correct,total,percentage,passed:percentage>=60,results,weakTopics:[...new Set(results.filter(r=>!r.isCorrect).map(r=>r.question.topic))]}};
+export const getSSS3Feedback=p=>p>=80?'Excellent. Attempt harder questions.':p>=60?'Good progress. Review your weak topics.':'Keep practising. Revisit the lesson before trying again.';
+export const recommendSSS3Difficulty=p=>p>=80?'Hard':p>=60?'Medium':'Easy';
