@@ -1,0 +1,6 @@
+const KEY='mathbridge-student-profile';
+const empty=()=>({version:1,name:'',level:'JSS1',createdAt:new Date().toISOString(),lastActiveAt:new Date().toISOString(),attempts:[],topicStats:{},masteredTopics:[],streak:0});
+export const loadStudentProfile=()=>{try{const raw=localStorage.getItem(KEY);return raw?{...empty(),...JSON.parse(raw)}:empty()}catch{return empty()}};
+export const saveStudentProfile=profile=>{const next={...profile,lastActiveAt:new Date().toISOString()};try{localStorage.setItem(KEY,JSON.stringify(next))}catch{}return next};
+export const recordExamAttempt=(profile,{exam,percentage,topics=[]})=>{const attempts=[...profile.attempts,{exam,percentage,topics,date:new Date().toISOString()}].slice(-50);const topicStats={...profile.topicStats};topics.forEach(t=>{const prev=topicStats[t.topic]||{attempts:0,correct:0,total:0};topicStats[t.topic]={attempts:prev.attempts+1,correct:prev.correct+t.correct,total:prev.total+t.total,percentage:Math.round((prev.correct+t.correct)/(prev.total+t.total)*100)}});return saveStudentProfile({...profile,attempts,topicStats})};
+export const setStudentIdentity=(profile,{name,level})=>saveStudentProfile({...profile,name:name??profile.name,level:level??profile.level});
