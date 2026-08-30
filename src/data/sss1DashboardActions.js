@@ -1,0 +1,2 @@
+export const getSSS1DashboardAction=(item)=>{if(!item)return{type:'start',label:'Start SSS 1'};if(item.action==='Review lesson')return{type:'lesson',label:'Review lesson',topic:item.topic};if(item.action==='Targeted practice')return{type:'practice',label:'Practise now',topic:item.topic};return{type:'challenge',label:'Take challenge',topic:item.topic}};
+export const getSSS1TopicRoute=action=>({lesson:'lesson',practice:'practice',challenge:'challenge',start:'curriculum'}[action?.type]||'curriculum');
