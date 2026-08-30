@@ -1,0 +1,4 @@
+import{getAllSSS1PracticeQuestions}from'./sss1Practice';
+export const loadSSS1PracticeHistory=()=>{try{return JSON.parse(localStorage.getItem('mathbridge-sss1-practice-history')||'[]')}catch{return[]}};
+export const saveSSS1PracticeAttempt=(attempt)=>{const h=loadSSS1PracticeHistory();const next=[{...attempt,id:Date.now(),date:new Date().toISOString()},...h].slice(0,50);localStorage.setItem('mathbridge-sss1-practice-history',JSON.stringify(next));return next};
+export const createAdaptiveSSS1Practice=(topic,mastery={},count=10)=>{const pool=topic?getAllSSS1PracticeQuestions().filter(q=>q.topic===topic):getAllSSS1PracticeQuestions();const weak=Object.entries(mastery).filter(([,x])=>x.percentage<80).map(([t])=>t);const filtered=weak.length?pool.filter(q=>weak.includes(q.topic)||!q.topic):pool;return[...filtered].sort((a,b)=>{const rank=x=>x.difficulty==='Hard'?3:x.difficulty==='Medium'?2:1;return rank(a)-rank(b)+Math.random()-.5}).slice(0,count)};
