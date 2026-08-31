@@ -13,4 +13,4 @@ export const SSS2_PRACTICE={
  'Revision and Examination Practice':[{id:'s2-revision-1',q:'Which strategy is most useful during a timed mixed mathematics test?',options:['Spend all the time on one hard question','Skip every difficult question','Answer manageable questions first and return to harder ones','Guess every answer'],answer:2,difficulty:'Easy'},{id:'s2-revision-2',q:'After a practice test, the best first step is to:',options:['Ignore mistakes','Review errors and identify the underlying topics','Only repeat questions already correct','Stop practising'],answer:1,difficulty:'Medium'}]
 };
 export const getSSS2PracticeQuestions=topic=>SSS2_PRACTICE[topic]||[];
-export const getAllSSS2PracticeQuestions=()=>Object.values(SSS2_PRACTICE).flat();
+export const getAllSSS2PracticeQuestions=()=>Object.entries(SSS2_PRACTICE).flatMap(([topic,questions])=>questions.map(q=>({...q,topic})));
