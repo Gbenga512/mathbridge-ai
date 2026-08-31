@@ -11,4 +11,4 @@ export const SSS1_PRACTICE={
  Probability:[{id:'prob-1',q:'What is the probability of rolling a 6 on a fair die?',options:['1/2','1/3','1/6','6/6'],answer:2,difficulty:'Easy'},{id:'prob-2',q:'A bag contains 3 red and 2 blue balls. What is P(red)?',options:['2/5','3/5','1/2','3/2'],answer:1,difficulty:'Medium'}]
 };
 export const getSSS1PracticeQuestions=(topic)=>SSS1_PRACTICE[topic]||[];
-export const getAllSSS1PracticeQuestions=()=>Object.values(SSS1_PRACTICE).flat();
+export const getAllSSS1PracticeQuestions=()=>Object.entries(SSS1_PRACTICE).flatMap(([topic,questions])=>questions.map(q=>({...q,topic})));
