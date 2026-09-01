@@ -1,12 +1,12 @@
 import React,{useMemo,useState}from'react';
 import{SSS1_CURRICULUM}from'./data/sss1Curriculum';import{SSS1_LESSONS}from'./data/sss1Lessons';import{getAllSSS1PracticeQuestions}from'./data/sss1Practice';
 import{SSS2_CURRICULUM}from'./data/sss2Curriculum';import{SSS2_LESSONS}from'./data/sss2Lessons';import{getAllSSS2PracticeQuestions}from'./data/sss2Practice';import{SSS2_EXTRA_PRACTICE}from'./data/sss2ExtraPractice';import{SSS2_EXTRA2_PRACTICE}from'./data/sss2ExtraPractice2';
-import{SSS3_CURRICULUM}from'./data/sss3Curriculum';import{SSS3_LESSONS}from'./data/sss3Lessons';import{getAllSSS3PracticeQuestions}from'./data/sss3Practice';import{SSS3_EXTRA_PRACTICE}from'./data/sss3ExtraPractice';import{SSS3_CBT_LAUNCHER}from'./data/sss3CbtLauncher';import WAECNECOCBT from'./WAECNECOCBT';
+import{SSS3_CURRICULUM}from'./data/sss3Curriculum';import{SSS3_LESSONS}from'./data/sss3Lessons';import{getAllSSS3PracticeQuestions}from'./data/sss3Practice';import{getAllSSS3ExpandedPracticeQuestions}from'./data/sss3PracticeExpansion';import{SSS3_EXTRA_PRACTICE}from'./data/sss3ExtraPractice';import{SSS3_CBT_LAUNCHER}from'./data/sss3CbtLauncher';import WAECNECOCBT from'./WAECNECOCBT';
 const flattenExtra=o=>Object.values(o).flat();
 const data={
  SSS1:{label:'SSS 1',curriculum:SSS1_CURRICULUM,lessons:SSS1_LESSONS,questions:getAllSSS1PracticeQuestions()},
  SSS2:{label:'SSS 2',curriculum:SSS2_CURRICULUM,lessons:SSS2_LESSONS,questions:[...getAllSSS2PracticeQuestions(),...flattenExtra(SSS2_EXTRA_PRACTICE),...flattenExtra(SSS2_EXTRA2_PRACTICE)]},
- SSS3:{label:'SSS 3',curriculum:SSS3_CURRICULUM,lessons:SSS3_LESSONS,questions:[...getAllSSS3PracticeQuestions(),...flattenExtra(SSS3_EXTRA_PRACTICE)]}
+ SSS3:{label:'SSS 3',curriculum:SSS3_CURRICULUM,lessons:SSS3_LESSONS,questions:[...getAllSSS3PracticeQuestions(),...getAllSSS3ExpandedPracticeQuestions(),...flattenExtra(SSS3_EXTRA_PRACTICE)]}
 };
 const shuffle=a=>{const x=[...a];for(let i=x.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[x[i],x[j]]=[x[j],x[i]]}return x};
 const SESSION_SIZE=5;
