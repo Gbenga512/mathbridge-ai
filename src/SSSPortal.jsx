@@ -9,7 +9,7 @@ const data={
  SSS3:{label:'SSS 3',curriculum:SSS3_CURRICULUM,lessons:SSS3_LESSONS,questions:[...getAllSSS3PracticeQuestions(),...getAllSSS3ExpandedPracticeQuestions(),...flattenExtra(SSS3_EXTRA_PRACTICE)]}
 };
 const shuffle=a=>{const x=[...a];for(let i=x.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[x[i],x[j]]=[x[j],x[i]]}return x};
-const SESSION_SIZE=5;
+const SESSION_SIZE=10;
 export default function SSSPortal({level='SSS1',onBack}){
  const cfg=data[level]||data.SSS1;const terms=Object.keys(cfg.curriculum||{});const[term,setTerm]=useState(terms[0]||'Term 1');const[topic,setTopic]=useState(null);const[showPractice,setShowPractice]=useState(false);const[practicePool,setPracticePool]=useState([]);const[qIndex,setQIndex]=useState(0);const[selected,setSelected]=useState(null);const[correct,setCorrect]=useState(0);const[done,setDone]=useState(false);const[showExams,setShowExams]=useState(false);const[activeExam,setActiveExam]=useState(null);const currentTerm=cfg.curriculum?.[term]||{topics:[]};const topics=currentTerm.topics||[];
  const topicPool=useMemo(()=>topic?cfg.questions.filter(q=>q.topic===topic):[],[cfg,topic]);const termPool=useMemo(()=>cfg.questions.filter(q=>topics.includes(q.topic)),[cfg,topics]);const pool=practicePool;const lesson=topic?cfg.lessons?.[topic]:null;const q=pool[qIndex];
