@@ -1,4 +1,5 @@
 import {supabase,supabaseConfigured} from './supabaseClient';
+export {supabaseConfigured} from './supabaseClient';
 
 const KEY='mathbridge-cloud-progress';
 const localGet=(userId)=>{try{return JSON.parse(localStorage.getItem(`${KEY}:${userId}`)||'null')}catch{return null}};
