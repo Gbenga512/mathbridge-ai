@@ -1,4 +1,30 @@
-import React,{useState}from'react';import{createRoot}from'react-dom/client';import'./styles.css';import'./termStyles.css';import'./sssEntry.css';import SSSPortal from'./SSSPortal';
-const goCurriculum=()=>{window.location.assign('/')};
-function App(){const[level,setLevel]=useState(null);if(level)return <SSSPortal level={level} onBack={goCurriculum}/>;return <main className="sss-shell"><div className="sss-head"><div><p className="step">MATHBRIDGE LEARNING CENTRE</p><h1>Choose where you want to learn</h1><p>All school levels are accessible from here.</p></div><button className="secondary" onClick={goCurriculum}>← Primary & JSS</button></div><div className="report" style={{marginBottom:24}}><h3>School Level Navigation</h3><div className="sss-practice-grid"><button className="secondary" onClick={goCurriculum}>📚 Primary 1–6 & JSS 1–3</button><button className="primary" onClick={()=>window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'})}>🎓 Senior Secondary (SSS 1–3)</button></div></div><div className="sss-levels"><button className="sss-level" onClick={()=>setLevel('SSS1')}><strong>SSS 1</strong><span>Build your senior secondary foundation</span></button><button className="sss-level" onClick={()=>setLevel('SSS2')}><strong>SSS 2</strong><span>Develop deeper algebra, geometry and statistics</span></button><button className="sss-level" onClick={()=>setLevel('SSS3')}><strong>SSS 3</strong><span>Master advanced mathematics and prepare for examinations</span></button></div></main>}
+import React,{useState}from'react';
+import{createRoot}from'react-dom/client';
+import'./styles.css';import'./termStyles.css';import'./sssEntry.css';import SSSPortal from'./SSSPortal';
+
+const goCurriculum=()=>{window.location.href='/';};
+
+function App(){
+ const[level,setLevel]=useState(null);
+ if(level)return <SSSPortal level={level} onBack={goCurriculum}/>;
+ return <main className="sss-shell">
+  <div className="sss-head">
+   <div><p className="step">MATHBRIDGE LEARNING CENTRE</p><h1>Choose where you want to learn</h1><p>Primary, JSS and Senior Secondary mathematics are all available.</p></div>
+   <button className="secondary" onClick={goCurriculum}>← Primary & JSS Curriculum</button>
+  </div>
+  <div className="report" style={{marginBottom:24}}>
+   <h3>School Level Navigation</h3>
+   <div className="sss-practice-grid">
+    <button className="secondary" onClick={goCurriculum}>📚 Primary 1–6 & JSS 1–3</button>
+    <button className="primary" onClick={()=>document.getElementById('sss-levels')?.scrollIntoView({behavior:'smooth'})}>🎓 Senior Secondary (SSS 1–3)</button>
+   </div>
+  </div>
+  <div className="sss-levels" id="sss-levels">
+   <button className="sss-level" onClick={()=>setLevel('SSS1')}><strong>SSS 1</strong><span>Build your senior secondary foundation</span></button>
+   <button className="sss-level" onClick={()=>setLevel('SSS2')}><strong>SSS 2</strong><span>Develop deeper algebra, geometry and statistics</span></button>
+   <button className="sss-level" onClick={()=>setLevel('SSS3')}><strong>SSS 3</strong><span>Master advanced mathematics and prepare for examinations</span></button>
+  </div>
+ </main>
+}
+
 createRoot(document.getElementById('root')).render(<App/>);
