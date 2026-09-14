@@ -49,3 +49,5 @@ q('j1-044','Algebraic word problems','A number plus 8 equals 20. What is the num
 q('j1-045','Logical reasoning','A is taller than B. B is taller than C. Who is tallest?',['A','B','C','They are equal'],0,'If A is taller than B and B is taller than C, A is tallest.'),
 q('j1-046','Revision and assessment','Solve 2x + 4 = 12.',['2','4','6','8'],1,'Subtract 4, then divide by 2. x = 4.')
 ];
+
+export const jss1Math={strands:[{name:'JSS1 Mathematics',topics:[...new Set(jss1Questions.map(q=>q.topic))]}]};
