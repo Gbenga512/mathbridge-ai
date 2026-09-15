@@ -1,14 +1,23 @@
-# MathBridge Question Bank — LOCKED PRODUCT STANDARD
+# MathBridge Question Bank — PRODUCTION PRODUCT STANDARD
 
 This file is the permanent product requirement for the MathBridge question system.
 
 ## Required minimums
-- P1–P6: 1,000+ questions per class.
-- JSS1–JSS3: 1,000+ questions per class.
-- SSS1–SSS3: 1,000+ questions per class.
-- WAEC Mathematics practice: 1,000+ questions.
-- NECO Mathematics practice: 1,000+ questions.
-- JAMB UTME Mathematics practice: 1,000+ questions.
+- P1–P6: **2,000+ original curriculum questions per class**.
+- JSS1–JSS3: **2,000+ original curriculum questions per class**.
+- SSS1–SSS3: **2,000+ original curriculum questions per class**.
+- WAEC Mathematics practice: **2,000+ original WAEC-style questions**.
+- NECO Mathematics practice: **2,000+ original NECO-style questions**.
+- JAMB UTME Mathematics practice: **2,000+ original JAMB-style questions**.
+
+This gives MathBridge a production baseline of at least **24,000 school-level curriculum questions plus 6,000 examination-style questions = 30,000 questions** before later expansions.
+
+## Question-quality standard
+Questions must be appropriate for the learner's class and Nigerian school context. They should use clear, simple English, familiar examples where appropriate, progressive difficulty, correct mathematical notation, plausible distractors, and concise explanations. Primary and JSS questions should not be unnecessarily wordy or use vocabulary beyond the expected learner level.
+
+Foreign educational resources may be used for curriculum research, topic coverage, problem-structure inspiration and pedagogical benchmarking. MathBridge must create its own original questions rather than copying protected question text, answer choices, explanations or distinctive problem statements from third-party sites.
+
+Useful reference resources include Khan Academy's structured arithmetic practice, OpenStax practice material, and NRICH's curriculum-linked primary and secondary problem collections. These are reference/inspiration sources, not direct question-bank imports. NRICH organizes resources by curriculum topics including number, algebra, geometry/measure and statistics, while Khan Academy provides structured practice across arithmetic and fractions. citeturn0search13turn0search2turn0search5
 
 ## Required metadata
 Every curriculum question must carry a unique ID, class level, term, week, topic, difficulty, four options, correct answer, explanation, learning objective and source type.
