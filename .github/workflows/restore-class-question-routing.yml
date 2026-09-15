@@ -1,0 +1,58 @@
+name: Restore class question routing
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/data/questionBank.js'
+      - '.github/workflows/restore-class-question-routing.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch-main:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Patch main question routing
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('src/main.jsx')
+          s=p.read_text()
+          old="import{curriculum,curriculumSource,levelOptions}from'./data/curriculum';import{jss1Math,jss1Questions}from'./data/jss1Math';"
+          new="import{curriculum,curriculumSource,levelOptions}from'./data/curriculum';import{jss1Math,jss1Questions}from'./data/jss1Math';import{getQuestionsForLevel}from'./data/questionBank';"
+          if old in s and "./data/questionBank" not in s:
+              s=s.replace(old,new,1)
+          old="const selectedLevel=levelOptions.find(x=>x.value===level)||levelOptions[0];const levelTopics=curriculum.jss?.levels?.[level]?.topics||curriculum.primary?.levels?.[level]?.topics||curriculum.sss?.levels?.[level]?.topics||[];const questions=level==='JSS1'?jss1Questions:[];const diagnosticQuestions"
+          new="const selectedLevel=levelOptions.find(x=>x.value===level)||levelOptions[0];const levelTopics=curriculum.jss?.levels?.[level]?.topics||curriculum.primary?.levels?.[level]?.topics||curriculum.sss?.levels?.[level]?.topics||[];const questions=getQuestionsForLevel(level);const diagnosticQuestions"
+          if old not in s: raise SystemExit('question routing anchor not found')
+          s=s.replace(old,new,1)
+          old="const topicResults=useMemo(()=>jss1Math.strands.flatMap(s=>s.topics).map(topic=>{const qs=questions.filter(q=>q.topic===topic),a=qs.filter(q=>answers[q.id]!==undefined),c=a.filter(q=>answers[q.id]===q.answer).length;return{topic,answered:a.length,score:a.length?Math.round(c/a.length*100):0}}),[answers,questions]);"
+          new="const topicResults=useMemo(()=>[...new Set(questions.map(q=>q.topic))].map(topic=>{const qs=questions.filter(q=>q.topic===topic),a=qs.filter(q=>answers[q.id]!==undefined),c=a.filter(q=>answers[q.id]===q.answer).length;return{topic,answered:a.length,score:a.length?Math.round(c/a.length*100):0}}),[answers,questions]);"
+          if old not in s: raise SystemExit('topic-results anchor not found')
+          s=s.replace(old,new,1)
+          old="const practicePool=useMemo(()=>{const seen=new Set(diagnosticQuestions.map(q=>q.id));let pool=[...adaptivePractice,...jss1PracticeQuestions,...questions.filter(q=>q.topic===lessonTopic&&!seen.has(q.id))].filter(q=>q.topic===lessonTopic);const target=selectedWeakScore<40?'easy':selectedWeakScore<60?'medium':'hard';const preferred=pool.filter(q=>q.difficulty===target);return shuffle([...preferred,...pool.filter(q=>q.difficulty!==target)]).slice(0,Math.min(3,pool.length))},[lessonTopic,diagnosticQuestions,questions,selectedWeakScore]);"
+          new="const practicePool=useMemo(()=>{const seen=new Set(diagnosticQuestions.map(q=>q.id));let pool;if(level==='JSS1'){pool=[...adaptivePractice,...jss1PracticeQuestions,...questions.filter(q=>q.topic===lessonTopic&&!seen.has(q.id))].filter(q=>q.topic===lessonTopic)}else{pool=questions.filter(q=>q.topic===lessonTopic&&!seen.has(q.id))}const target=selectedWeakScore<40?'easy':selectedWeakScore<60?'medium':'hard';const preferred=pool.filter(q=>q.difficulty===target);return shuffle([...preferred,...pool.filter(q=>q.difficulty!==target)]).slice(0,Math.min(3,pool.length))},[level,lessonTopic,diagnosticQuestions,questions,selectedWeakScore]);"
+          if old not in s: raise SystemExit('practice anchor not found')
+          s=s.replace(old,new,1)
+          old="const testQuestions=useMemo(()=>{let pool=shuffle([...adaptiveTest.filter(q=>q.topic===lessonTopic),...jss1TestQuestions.filter(q=>q.topic===lessonTopic)]);if(pool.length<3){const extras=shuffle([...adaptiveTest,...jss1TestQuestions].filter(q=>q.topic!==lessonTopic));pool=[...pool,...extras]}return pool.slice(0,Math.min(5,pool.length))},[lessonTopic,challengeSeed]);"
+          new="const testQuestions=useMemo(()=>{let pool=level==='JSS1'?shuffle([...adaptiveTest.filter(q=>q.topic===lessonTopic),...jss1TestQuestions.filter(q=>q.topic===lessonTopic)]):shuffle(questions.filter(q=>q.topic===lessonTopic));if(pool.length<3){const extras=level==='JSS1'?shuffle([...adaptiveTest,...jss1TestQuestions].filter(q=>q.topic!==lessonTopic)):shuffle(questions.filter(q=>q.topic!==lessonTopic));pool=[...pool,...extras]}return pool.slice(0,Math.min(5,pool.length))},[level,lessonTopic,challengeSeed,questions]);"
+          if old not in s: raise SystemExit('test anchor not found')
+          s=s.replace(old,new,1)
+          p.write_text(s)
+          PY
+
+      - name: Verify and commit
+        run: |
+          npm install --no-audit --no-fund
+          npm run build
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/main.jsx
+          git diff --cached --quiet || git commit -m "Restore separate question banks for all classes"
+          git push
