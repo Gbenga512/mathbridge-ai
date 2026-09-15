@@ -2,6 +2,16 @@
 
 This is the running record of major MathBridge product, architecture, security, curriculum, deployment, and documentation decisions.
 
+## 2026-09-15 — Production RLS and database performance hardening
+
+- Applied a live Supabase migration to optimize the affected RLS policies by wrapping `auth.uid()`/authentication evaluation in a scalar `SELECT`, preventing repeated per-row initialization at scale.
+- Hardened the affected policies for progress, assessments, term reports, question history, parent/child relationships, teacher classes, class students, school enrollments, school audit logs, profiles, and the student-facing School Test Centre.
+- Added dedicated foreign-key indexes for production query paths identified by the Supabase performance advisor.
+- Re-ran the Supabase performance advisor after the migration: the previous **15 Auth RLS initialization-plan warnings are cleared**.
+- The remaining unused-index notices are informational and are being retained until real production traffic establishes whether each index is useful.
+- Reworked the `enroll_student_in_school` security-definer function so its authorization check uses the submitted school identifier directly. This removes an unsafe dependency on an unrelated test-row lookup and keeps school enrollment authorization deterministic.
+- Re-ran the Supabase security advisor. The signed-in SECURITY DEFINER warning count is now **8**, representing intentionally client-callable application RPCs. Internal helper execution remains restricted.
+
 ## 2026-09-15 — School Test Centre RLS recursion fix
 
 - Reproduced the student **My Tests** failure visible in production: `infinite recursion detected in policy for relation "school_tests"`.
@@ -19,6 +29,12 @@ This is the running record of major MathBridge product, architecture, security, 
 - This prevents email confirmation links generated from the local development environment from sending phone users to the local laptop server.
 - The Supabase Auth Redirect URL allow-list must include the production URL for the explicit redirect to be accepted.
 - The existing localhost URL may remain configured for local development.
+
+## 2026-09-15 — Role-aware profile lookup foundation
+
+- Added `getUserProfile(userId)` to `src/cloudProgress.js` so the application can resolve the protected platform role from the live `profiles` table after authentication.
+- This is the foundation for strict role-aware portal routing and prevents platform-owner accounts from being treated as ordinary student accounts as the production navigation is hardened.
+- Public signup continues to create only student accounts; platform roles remain controlled server-side.
 
 ## 2026-09-15 — Student progress dashboard UI refresh
 
