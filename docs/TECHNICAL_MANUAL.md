@@ -28,6 +28,7 @@ Primary implementation areas include:
 - `supabase/platform_owner.sql` — platform-owner migration
 - `supabase/secure_school_tests.sql` — secure school-test migration
 - `supabase/student_question_history.sql` — persistent question-history migration
+- `supabase/security_hardening.sql` — production RLS and function privilege hardening record
 
 ## 3. Authentication and Authorization
 
@@ -42,7 +43,7 @@ The current role model includes:
 - site_admin
 - site_manager
 
-The platform-owner migration expands the database role constraint and provides protected owner functions.
+The platform-owner migration expands the database role constraint and provides protected owner functions. A database trigger prevents ordinary profile updates from changing a user's protected role.
 
 ## 4. Data Ownership
 
@@ -59,9 +60,9 @@ Student progress and learning history are student-owned. School enrollment is a 
 3. Exclude those IDs from candidate question pools.
 4. Record each newly exposed question.
 5. Record the answer outcome.
-6. Keep local fallback only for degraded/offline operation.
+6. Keep local fallback only for deliberate degraded/offline operation.
 
-The migration must be executed in the live Supabase project before cloud question history is available.
+The live MathBridge Supabase project now contains the question-history table and canonical RPC contract. Cross-device no-repeat is fully dependent on each learning activity using that service when selecting and exposing questions; diagnostic selection is integrated, while practice/mastery/test/exam coverage remains part of the continuing learning-flow hardening stage.
 
 ## 6. Progress Persistence
 
@@ -79,7 +80,7 @@ The platform owner is represented by the `site_manager` role. Owner access is no
 
 The `get_site_manager_dashboard()` database function is protected by the `is_site_manager()` check.
 
-Before using the owner dashboard in production, execute `supabase/platform_owner.sql` and manually provision the first trusted owner account.
+The live MathBridge Supabase project has the platform-owner migration applied. The first trusted owner account still requires controlled provisioning rather than public signup.
 
 ## 9. Secure Test Architecture
 
@@ -87,9 +88,17 @@ School tests require special care because answer keys must not be exposed to stu
 
 `start_school_test` validates the authenticated student assignment and test availability, records the start state, and creates the attempt server-side. `submit_school_test` reads the protected answer key, calculates the objective score, writes the attempt, and closes the assignment server-side. Students never receive the answer key through the test-item API.
 
-The secure-test migration is repository-ready but must be executed and verified in the live Supabase project before secure-test behavior can be considered production-complete.
+The live submission function was hardened to avoid variable/column name collisions and now enforces the configured test duration server-side in addition to the test closing window. This prevents a client from extending a timed test by manipulating browser state.
 
-## 10. Deployment
+## 10. Database Security Hardening
+
+The live Supabase project has explicit RLS policies for the school relationship tables and authenticated-only access to protected RPCs. Anonymous execution of privileged functions and direct anonymous access to protected school tables have been revoked.
+
+The generic Supabase advisor may continue to report authenticated `SECURITY DEFINER` functions. This is reviewed intentionally: application RPCs such as test start/submit and question-history recording must be callable by signed-in users, while helper functions are used to enforce authorization. These functions validate `auth.uid()` and are not public anonymous endpoints.
+
+The repository records the applied hardening in `supabase/security_hardening.sql`.
+
+## 11. Deployment
 
 The application is connected to Vercel through GitHub. Production Supabase configuration is supplied through Vercel environment variables:
 
@@ -98,13 +107,13 @@ The application is connected to Vercel through GitHub. Production Supabase confi
 
 Environment-variable changes require a new deployment.
 
-## 11. Production Verification Rule
+## 12. Production Verification Rule
 
 A repository change is not considered production-complete merely because it has been committed. The feature must be integrated, deployed, tested on the actual application, and checked for regressions.
 
 Database migrations are not considered live until they have been executed successfully in the production Supabase project.
 
-## 12. Android Roadmap
+## 13. Android Roadmap
 
 The long-term distribution target is a signed Android application bundle for Google Play Store distribution. The web and Android clients should use the same Supabase backend and account/data model.
 
