@@ -24,6 +24,16 @@ export async function getUserProfile(userId){
  return null;
 }
 
+export async function setStudentClass(userId,classLevel){
+ if(!classLevel)return {data:null,error:new Error('Please select your current class.')};
+ if(supabaseConfigured&&userId){
+  const {data,error}=await supabase.rpc('set_student_class',{p_class_level:classLevel});
+  if(!error&&data)return {data,error:null};
+  return {data:null,error:error||new Error('Unable to save your class.')};
+ }
+ try{localStorage.setItem('mathbridge-class-level',classLevel);return {data:{id:userId,role:'student',class_level:classLevel},error:null}}catch(error){return {data:null,error}};
+}
+
 export async function getProgress(userId='local-user'){
  if(supabaseConfigured&&userId&&userId!=='local-user'){
   const {data,error}=await supabase.from('progress').select('*').eq('student_id',userId).maybeSingle();
