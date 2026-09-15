@@ -11,9 +11,9 @@ create table if not exists public.school_test_answer_keys(
 
 alter table public.school_test_answer_keys enable row level security;
 drop policy if exists "school answer keys staff" on public.school_test_answer_keys;
-create policy "school answer keys staff" on public.school_test_answer_keys
-  for all using(exists(select 1 from public.school_test_items i join public.school_tests t on t.id=i.test_id where i.id=item_id and public.is_school_staff(t.school_id)))
-  with check(exists(select 1 from public.school_test_items i join public.school_tests t on t.id=i.test_id where i.id=item_id and public.is_school_staff(t.school_id)));
+drop policy if exists "school answer keys staff insert" on public.school_test_answer_keys;
+create policy "school answer keys staff insert" on public.school_test_answer_keys
+  for insert with check(exists(select 1 from public.school_test_items i join public.school_tests t on t.id=i.test_id where i.id=item_id and public.is_school_admin(t.school_id)));
 
 -- Replace the broad student write policies from the base schema.
 drop policy if exists "school tests staff" on public.school_tests;
