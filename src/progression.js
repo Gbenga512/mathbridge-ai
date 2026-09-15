@@ -10,13 +10,42 @@ export const defaultProgress=DEFAULT_PROGRESS;
 
 const key=(term,week)=>`${term}-${week}`;
 
+const weeksFor=term=>jss1Weekly[term]||[];
+
+// Recover the furthest valid learning cursor from immutable completion keys.
+// This is deliberately independent of the stored term/week cursor so an old
+// browser snapshot or stale cloud row can never send a mastered learner back
+// to the beginning of a term.
+function cursorAfterMastered(masteredWeeks){
+ const mastered=new Set(masteredWeeks||[]);
+ let term='T1';
+ let week=1;
+ for(const t of TERM_ORDER){
+  const weeks=weeksFor(t);
+  let next=1;
+  while(next<=weeks.length&&mastered.has(key(t,next)))next+=1;
+  if(next<=weeks.length){term=t;week=next;return {term,week};}
+  if(weeks.length===0){term=t;week=1;return {term,week};}
+ }
+ const last=TERM_ORDER[TERM_ORDER.length-1];
+ return {term:last,week:Math.max(weeksFor(last).length,1)};
+}
+
 export function normalizeProgress(value){
  const p=value&&typeof value==='object'?value:{};
- const term=TERM_ORDER.includes(p.term)?p.term:'T1';
- const weeks=jss1Weekly[term]||[];
+ const requestedTerm=TERM_ORDER.includes(p.term)?p.term:'T1';
+ const requestedWeeks=weeksFor(requestedTerm);
  const parsedWeek=Number(p.week);
- const week=Number.isInteger(parsedWeek)&&parsedWeek>=1&&parsedWeek<=Math.max(weeks.length,1)?parsedWeek:1;
+ const requestedWeek=Number.isInteger(parsedWeek)&&parsedWeek>=1&&parsedWeek<=Math.max(requestedWeeks.length,1)?parsedWeek:1;
  const masteredWeeks=Array.isArray(p.masteredWeeks)?[...new Set(p.masteredWeeks.map(String).filter(Boolean))]:[];
+ const recovered=cursorAfterMastered(masteredWeeks);
+ const requestedIndex=TERM_ORDER.indexOf(requestedTerm);
+ const recoveredIndex=TERM_ORDER.indexOf(recovered.term);
+ // Preserve a legitimate cursor that is ahead of the recovered completion
+ // cursor, while always honouring completed terms/weeks found in the history.
+ const useRecovered=recoveredIndex>requestedIndex||(recoveredIndex===requestedIndex&&recovered.week>requestedWeek);
+ const term=useRecovered?recovered.term:requestedTerm;
+ const week=useRecovered?recovered.week:requestedWeek;
  return {term,week,masteredWeeks};
 }
 
@@ -47,13 +76,13 @@ export function isWeekUnlocked(progress,term,week){
 
 export function completeWeek(progress,term,week){
  const p=normalizeProgress(progress);
- const weeks=jss1Weekly[term]||[];
+ const weeks=weeksFor(term);
  if(!TERM_ORDER.includes(term)||!Number.isInteger(week)||week<1||!weeks.length)return p;
  const completedKey=key(term,week);
  const mastered=new Set(p.masteredWeeks);
  if(mastered.has(completedKey))return p;
  mastered.add(completedKey);
- if(term!==p.term||week!==p.week)return {term:p.term,week:p.week,masteredWeeks:[...mastered]};
+ if(term!==p.term||week!==p.week)return normalizeProgress({term:p.term,week:p.week,masteredWeeks:[...mastered]});
  let nextTerm=term;
  let nextWeek=week+1;
  if(nextWeek>weeks.length){
@@ -61,12 +90,12 @@ export function completeWeek(progress,term,week){
   if(idx<TERM_ORDER.length-1){nextTerm=TERM_ORDER[idx+1];nextWeek=1}
   else{nextTerm=term;nextWeek=week}
  }
- return {term:nextTerm,week:nextWeek,masteredWeeks:[...mastered]};
+ return normalizeProgress({term:nextTerm,week:nextWeek,masteredWeeks:[...mastered]});
 }
 
 export function termCompleted(progress,term){
  const p=normalizeProgress(progress);
- const weeks=jss1Weekly[term]||[];
+ const weeks=weeksFor(term);
  return weeks.length>0&&weeks.every(w=>p.masteredWeeks.includes(key(term,w.week)));
 }
 
@@ -74,5 +103,5 @@ export function curriculumCompleted(progress){return TERM_ORDER.every(term=>term
 
 export function getCurrentWeek(progress){
  const p=normalizeProgress(progress);
- return jss1Weekly[p.term]?.find(w=>w.week===p.week)||null;
+ return weeksFor(p.term).find(w=>w.week===p.week)||null;
 }
