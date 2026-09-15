@@ -1,28 +1,30 @@
 import React,{useState}from'react';
 import './auth.css';
-import {saveCloudProgress,getProgress,signUpStudent,signInStudent,supabaseConfigured} from './cloudProgress';
+import {saveCloudProgress,getProgress,getUserProfile,signUpStudent,signInStudent,supabaseConfigured} from './cloudProgress';
+import SchoolPortal from './SchoolPortal';
 
 const hydrateLocalProgress=async userId=>{const cloud=await getProgress(userId);if(cloud){try{localStorage.setItem('mathbridge-progress',JSON.stringify({term:cloud.term,week:cloud.week,masteredWeeks:cloud.masteredWeeks||[]}))}catch{}}return cloud};
 
 export default function StudentAccount({onBack,onContinue,onAuthenticated}){
- const[mode,setMode]=useState('login'),[email,setEmail]=useState(''),[password,setPassword]=useState(''),[studentName,setStudentName]=useState(''),[message,setMessage]=useState(''),[busy,setBusy]=useState(false),[showPassword,setShowPassword]=useState(false);
+ const[mode,setMode]=useState('login'),[email,setEmail]=useState(''),[password,setPassword]=useState(''),[studentName,setStudentName]=useState(''),[message,setMessage]=useState(''),[busy,setBusy]=useState(false),[showPassword,setShowPassword]=useState(false),[authenticatedRole,setAuthenticatedRole]=useState(null),[authenticatedUserId,setAuthenticatedUserId]=useState(null);
  const chooseMode=next=>{if(busy)return;setMode(next);setMessage('');setShowPassword(false)};
- const finishLogin=async result=>{const userId=result?.data?.user?.id||result?.user?.id;if(!userId)return null;try{localStorage.setItem('mathbridge-current-user',userId)}catch{}const cloud=await hydrateLocalProgress(userId);onAuthenticated?.(userId,cloud);return cloud};
+ const finishLogin=async result=>{const userId=result?.data?.user?.id||result?.user?.id;if(!userId)return null;try{localStorage.setItem('mathbridge-current-user',userId)}catch{}const profile=await getUserProfile(userId);const role=profile?.role||'student';try{localStorage.setItem('mathbridge-role',role)}catch{}setAuthenticatedUserId(userId);setAuthenticatedRole(role);const cloud=await hydrateLocalProgress(userId);onAuthenticated?.(userId,cloud,profile);return {cloud,profile};};
  const openDashboard=()=>{setMessage('Login successful. Opening your Maths dashboard…');setTimeout(()=>onContinue?.(),350)};
  const submit=async e=>{e.preventDefault();setMessage('');if(!email||!password||(mode==='signup'&&!studentName)){setMessage('Please complete all required fields.');return}setBusy(true);try{
   if(supabaseConfigured){
    const result=mode==='signup'?await signUpStudent({email:email.trim(),password,fullName:studentName,classLevel:'JSS1'}):await signInStudent(email.trim(),password);
    if(result.error){setMessage(result.error.message||'Account request failed.');return}
    if(mode==='signup'){
-    if(result.data?.session){await finishLogin(result);setMessage('Account created. Opening your Maths dashboard…');setTimeout(()=>onContinue?.(),350)}
+    if(result.data?.session){const sessionResult=await finishLogin(result);if(sessionResult?.profile?.role&&sessionResult.profile.role!=='student')setMessage('Account created. Opening your authorized portal…');else setMessage('Account created. Opening your Maths dashboard…');setTimeout(()=>onContinue?.(),350)}
     else setMessage('Account created. Please check your email to confirm the account, then log in.');
-   }else{await finishLogin(result);openDashboard()}
+   }else{const sessionResult=await finishLogin(result);if(sessionResult?.profile?.role&&sessionResult.profile.role!=='student'){setMessage('Login successful. Opening your authorized portal…')}else{openDashboard()}}
   }else{
-   const userId=`student:${email.trim().toLowerCase()}`;try{localStorage.setItem('mathbridge-current-user',userId)}catch{}
-   if(mode==='signup'){const p={userId,role:'student',name:studentName,term:'T1',week:1,masteredWeeks:[]};await saveCloudProgress(userId,p);onAuthenticated?.(userId,p);setMessage('Student account created. Opening your Maths dashboard…');setTimeout(()=>onContinue?.(),350)}
-   else{const p=await getProgress(userId);if(p)try{localStorage.setItem('mathbridge-progress',JSON.stringify({term:p.term,week:p.week,masteredWeeks:p.masteredWeeks||[]}))}catch{}if(p){onAuthenticated?.(userId,p);openDashboard()}else setMessage('No account record was found on this device.')}
+   const userId=`student:${email.trim().toLowerCase()}`;try{localStorage.setItem('mathbridge-current-user',userId);localStorage.setItem('mathbridge-role','student')}catch{}
+   if(mode==='signup'){const p={userId,role:'student',name:studentName,term:'T1',week:1,masteredWeeks:[]};await saveCloudProgress(userId,p);setAuthenticatedUserId(userId);setAuthenticatedRole('student');onAuthenticated?.(userId,p,{id:userId,role:'student',full_name:studentName});setMessage('Student account created. Opening your Maths dashboard…');setTimeout(()=>onContinue?.(),350)}
+   else{const p=await getProgress(userId);if(p)try{localStorage.setItem('mathbridge-progress',JSON.stringify({term:p.term,week:p.week,masteredWeeks:p.masteredWeeks||[]}))}catch{}if(p){onAuthenticated?.(userId,p,{id:userId,role:'student'});setAuthenticatedUserId(userId);setAuthenticatedRole('student');openDashboard()}else setMessage('No account record was found on this device.')}
   }
  }catch(err){setMessage(err?.message||'Unable to connect to the account service. Please try again.')}finally{setBusy(false)}};
+ if(authenticatedUserId&&authenticatedRole&&authenticatedRole!=='student')return <SchoolPortal userId={authenticatedUserId} onBack={onBack}/>;
  return <main className="auth-page">
    <section className="auth-shell" aria-label="MathBridge student account">
     <div className="auth-brand-panel">
