@@ -1,8 +1,8 @@
 {
-  "name": "mathbridge-ai",
-  "version": "1.1.0",
-  "private": true,
-  "scripts": {"dev": "vite", "build": "vite build", "preview": "vite preview"},
-  "dependencies": {"@supabase/supabase-js": "latest", "@vitejs/plugin-react": "latest", "vite": "latest", "react": "latest", "react-dom": "latest"},
-  "devDependencies": {}
+  "name":"mathbridge-ai",
+  "version":"1.2.0",
+  "private":true,
+  "scripts":{"dev":"vite","build":"vite build","verify:question-banks":"node scripts/verify-question-banks.mjs","verify":"npm run verify:question-banks && npm run build","preview":"vite preview"},
+  "dependencies":{"@supabase/supabase-js":"latest","@vitejs/plugin-react":"latest","vite":"latest","react":"latest","react-dom":"latest"},
+  "devDependencies":{}
 }
