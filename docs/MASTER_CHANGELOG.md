@@ -2,6 +2,16 @@
 
 This is the running record of major MathBridge product, architecture, security, curriculum, deployment, and documentation decisions.
 
+## 2026-09-15 — School Test Centre RLS recursion fix
+
+- Reproduced the student **My Tests** failure visible in production: `infinite recursion detected in policy for relation "school_tests"`.
+- Root cause was circular RLS evaluation: the student assignment policy on `school_test_assignments` could evaluate the `school_tests` staff policy, which in turn evaluates school-staff membership, while the student test-read policy was also traversing assignments.
+- Added the security-definer helper `is_school_test_staff(test_id, user_id)` for staff authorization without recursively evaluating the `school_tests` RLS policy.
+- Explicitly qualified outer table references in student test and test-item policies.
+- Replaced the assignment staff policy and attempt staff-read policy with the non-recursive helper path.
+- Applied the migration to the live MathBridge Supabase project successfully.
+- This fixes the database-policy error shown on the production **My Tests** screen without exposing answer keys to students.
+
 ## 2026-09-15 — Production email confirmation redirect
 
 - Identified the student signup confirmation failure: Supabase was redirecting confirmed users to `http://localhost:3000`, which is only reachable from the development machine.
@@ -9,6 +19,13 @@ This is the running record of major MathBridge product, architecture, security, 
 - This prevents email confirmation links generated from the local development environment from sending phone users to the local laptop server.
 - The Supabase Auth Redirect URL allow-list must include the production URL for the explicit redirect to be accepted.
 - The existing localhost URL may remain configured for local development.
+
+## 2026-09-15 — Student progress dashboard UI refresh
+
+- Redesigned the student progress dashboard for a production education-product experience on desktop and mobile.
+- Improved visual hierarchy for current term/week, mastered topics, learning journey, School Test Centre, WAEC/NECO Performance Centre, and Continue Learning.
+- Preserved the existing progression and mastery logic while improving presentation.
+- Production deployment was created from commit `c6db2516d822c40b6f0e5ec06ecdbf7dce0e4db3`.
 
 ## 2026-09-15 — Documentation foundation
 
