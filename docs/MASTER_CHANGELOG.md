@@ -30,6 +30,15 @@ This is the running record of major MathBridge product, architecture, security, 
 - The migration is repository-ready but must be executed in the live Supabase project before cloud history becomes active.
 - Full no-repeat behavior is not yet marked complete until the main diagnostic/practice/mastery selection flow is integrated with the service and tested across devices.
 
+## 2026-09-15 — CI failure diagnosis and repair
+
+- Investigated the repeated **Primary and JSS Curriculum QA** failures shown in GitHub Actions.
+- The failure was not caused by curriculum code or the new question-history code.
+- The workflow failed at `actions/setup-node@v4` because `cache: npm` requires a dependency lock file, while the repository did not contain `package-lock.json`, `npm-shrinkwrap.json`, or `yarn.lock`.
+- Consequently `npm ci` and all curriculum QA/build steps were skipped.
+- Updated `.github/workflows/primary1-qa.yml` to remove lockfile-dependent npm caching and use `npm install` so the existing repository can run its QA suite.
+- Updated the README to describe MathBridge as the production product rather than an MVP/prototype.
+
 ## Earlier production foundations
 
 - GitHub repository: `Gbenga512/mathbridge-ai`.
