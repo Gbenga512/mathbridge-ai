@@ -83,7 +83,11 @@ Before using the owner dashboard in production, execute `supabase/platform_owner
 
 ## 9. Secure Test Architecture
 
-School tests require special care because answer keys must not be exposed to students through ordinary client-readable records. The repository contains `supabase/secure_school_tests.sql` for server-side test start/submission handling and protected answer keys. This migration must be executed and verified in Supabase before secure-test behavior can be considered production-complete.
+School tests require special care because answer keys must not be exposed to students through ordinary client-readable records. `supabase/secure_school_tests.sql` creates `school_test_answer_keys` with no student-readable policy, restricts students to assigned/published tests and question snapshots, and replaces broad student write access to assignments/attempts with read-only access.
+
+`start_school_test` validates the authenticated student assignment and test availability, records the start state, and creates the attempt server-side. `submit_school_test` reads the protected answer key, calculates the objective score, writes the attempt, and closes the assignment server-side. Students never receive the answer key through the test-item API.
+
+The secure-test migration is repository-ready but must be executed and verified in the live Supabase project before secure-test behavior can be considered production-complete.
 
 ## 10. Deployment
 
