@@ -13,7 +13,7 @@ export function freshQuestions(userId,questions){const seen=new Set(localGet(use
 
 export async function getCloudSeenQuestionIds(userId,level=null,activityType=null){
  if(supabaseConfigured&&userId&&userId!=='local-user'){
-  const{data,error}=await supabase.rpc('get_seen_question_ids',{p_level:level,p_activity_type:activityType});
+  const{data,error}=await supabase.rpc('get_seen_question_ids',{p_activity_type:activityType});
   if(!error){const ids=(data||[]).map(x=>String(x.question_id));markQuestionsSeen(userId,ids);return ids}
  }
  return localGet(userId);
@@ -23,7 +23,7 @@ export async function recordQuestionExposure({studentId,questionId,level=null,to
  if(!questionId)return{ok:false,error:new Error('Question ID is required')};
  markQuestionSeen(studentId,questionId);
  if(supabaseConfigured&&studentId&&studentId!=='local-user'){
-  const{data,error}=await supabase.rpc('record_question_exposure',{p_question_id:String(questionId),p_level:level,p_topic:topic,p_activity_type:activityType,p_session_id:sessionId});
+  const{data,error}=await supabase.rpc('record_question_exposure',{p_question_id:String(questionId),p_activity_type:activityType,p_topic:topic,p_class_level:level});
   if(!error)return{ok:true,mode:'supabase',id:data};
  }
  return{ok:true,mode:'local'};
@@ -31,8 +31,9 @@ export async function recordQuestionExposure({studentId,questionId,level=null,to
 
 export async function recordQuestionAnswer({studentId,questionId,activityType='practice',correct}){
  if(supabaseConfigured&&studentId&&studentId!=='local-user'){
-  const{data,error}=await supabase.rpc('record_question_answer',{p_question_id:String(questionId),p_activity_type:activityType,p_correct:Boolean(correct)});
+  const{data,error}=await supabase.rpc('record_question_outcome',{p_question_id:String(questionId),p_activity_type:activityType,p_was_correct:Boolean(correct)});
   if(!error)return{ok:Boolean(data),mode:'supabase'};
  }
+ markQuestionSeen(studentId,questionId);
  return{ok:true,mode:'local'};
 }
