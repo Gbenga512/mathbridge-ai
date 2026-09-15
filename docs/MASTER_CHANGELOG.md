@@ -38,6 +38,16 @@ This is the running record of major MathBridge product, architecture, security, 
 - Diagnostic question exposure is recorded for authenticated students through the Supabase question-history RPC and locally for anonymous/degraded sessions.
 - Added `scripts/question-selection-qa.mjs` and wired it into the CI verification path.
 
+## 2026-09-15 — Learning engine foundation
+
+- Corrected `src/questionHistory.js` to use the current production RPC contract: `p_level`, `p_topic`, `p_activity_type`, `p_session_id`, and `record_question_answer`.
+- Added activity-scoped local question history so diagnostic, practice, mastery, test, and exam activity histories can be kept distinct.
+- Added `src/learningQuestionEngine.js` as the shared learning-session orchestration layer.
+- Defined canonical activity types: `diagnostic`, `practice`, `mastery`, `test`, and `exam`.
+- Added shared operations for loading cloud history, selecting fresh activity questions, recording presented questions, and recording outcomes.
+- Strengthened question-selection QA to verify exclusion of seen IDs, uniqueness, topic diversity, and safe fallback behavior.
+- Practice/mastery/test/exam integration into the visible main learning flow remains the next integration checkpoint; this foundation is not being represented as complete until that integration is tested.
+
 ## 2026-09-15 — Secure School Test Centre foundation
 
 - Added `supabase/secure_school_tests.sql` as the production security migration for the School Test Centre.
@@ -51,7 +61,6 @@ This is the running record of major MathBridge product, architecture, security, 
 
 - Added explicit RLS policies for parent/teacher relationships and school operational tables.
 - Removed anonymous execute access from privileged school, platform-owner, question-history, and test RPCs.
-- Verified PostgreSQL function ACLs for the protected application RPCs.
 - Added a database trigger preventing ordinary authenticated users from changing their own protected platform role.
 - Added protected school audit-log access for authorized school administrators.
 - Supabase Security Advisor no longer reports the previous RLS-enabled/no-policy findings.
