@@ -30,14 +30,24 @@ This is the running record of major MathBridge product, architecture, security, 
 - The migration is repository-ready but must be executed in the live Supabase project before cloud history becomes active.
 - Full no-repeat behavior is not yet marked complete until the main diagnostic/practice/mastery selection flow is integrated with the service and tested across devices.
 
+## 2026-09-15 — Persistent diagnostic selection integration
+
+- Added `src/questionSelection.js` as the production question-selection layer.
+- Diagnostic selection now prefers questions the student has not previously seen while preserving topic diversity.
+- Integrated diagnostic selection into the main learning flow.
+- Diagnostic question exposure is recorded for authenticated students through the Supabase question-history RPC and locally for anonymous/degraded sessions.
+- Added `scripts/question-selection-qa.mjs` and wired it into the CI verification path.
+- The persistent cloud migration still must be executed in live Supabase before cross-device history can be considered fully operational.
+
 ## 2026-09-15 — CI failure diagnosis and repair
 
 - Investigated the repeated **Primary and JSS Curriculum QA** failures shown in GitHub Actions.
-- The failure was not caused by curriculum code or the new question-history code.
+- The original failure was not caused by curriculum code or the question-history code.
 - The workflow failed at `actions/setup-node@v4` because `cache: npm` requires a dependency lock file, while the repository did not contain `package-lock.json`, `npm-shrinkwrap.json`, or `yarn.lock`.
 - Consequently `npm ci` and all curriculum QA/build steps were skipped.
 - Updated `.github/workflows/primary1-qa.yml` to remove lockfile-dependent npm caching and use `npm install` so the existing repository can run its QA suite.
-- Updated the README to describe MathBridge as the production product rather than an MVP/prototype.
+- The Node runtime was subsequently aligned with the current dependency requirements.
+- The latest full Primary/JSS QA run passed, including the production build.
 
 ## Earlier production foundations
 
