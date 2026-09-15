@@ -1,4 +1,5 @@
 import React,{useState}from'react';
+import './auth.css';
 import {saveCloudProgress,getProgress,signUpStudent,signInStudent,supabaseConfigured} from './cloudProgress';
 
 const hydrateLocalProgress=async userId=>{const cloud=await getProgress(userId);if(cloud){try{localStorage.setItem('mathbridge-progress',JSON.stringify({term:cloud.term,week:cloud.week,masteredWeeks:cloud.masteredWeeks||[]}))}catch{}}return cloud};
