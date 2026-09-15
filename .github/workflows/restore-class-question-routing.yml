@@ -1,56 +1,24 @@
-name: Restore class question routing
+name: Application regression QA
 on:
   push:
     branches: [main]
     paths:
-      - 'src/data/questionBank.js'
-      - 'src/questionHistory.js'
-      - 'src/SSSPortal.jsx'
-      - 'src/WAECNECOCBT.jsx'
+      - 'src/**'
+      - 'scripts/**'
+      - 'package.json'
       - '.github/workflows/restore-class-question-routing.yml'
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 permissions:
-  contents: write
+  contents: read
 jobs:
-  patch-routing:
+  verify:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with: {fetch-depth: 1}
-      - name: Patch application routing and history
-        run: |
-          python - <<'PY'
-          from pathlib import Path
-          p=Path('src/main.jsx');s=p.read_text()
-          if "./questionHistory" not in s:s=s.replace("import{getSession,getProgress as getCloudProgress,saveCloudProgress}from'./cloudProgress';","import{getSession,getProgress as getCloudProgress,saveCloudProgress}from'./cloudProgress';import{freshQuestions,markQuestionSeen}from'./questionHistory';",1)
-          old="const questions=getQuestionsForLevel(level);const diagnosticQuestions=useMemo(()=>randomDiagnostic(questions,10),[questions,sessionSeed]);"
-          new="const questions=getQuestionsForLevel(level);const freshBank=useMemo(()=>freshQuestions(userId||'local-user',questions),[userId,questions]);const diagnosticQuestions=useMemo(()=>randomDiagnostic(freshBank.length>=10?freshBank:questions,10),[freshBank,questions,sessionSeed,userId]);"
-          if old in s:s=s.replace(old,new,1)
-          old="const answer=n=>setAnswers({...answers,[diagnosticQuestions[i].id]:n});";new="const answer=n=>{const id=diagnosticQuestions[i]?.id;if(id)markQuestionSeen(userId||'local-user',id);setAnswers({...answers,[id]:n});};";s=s.replace(old,new,1)
-          old="const practiceSelect=n=>{if(!practiceDone)setPracticeAnswer(n)};";new="const practiceSelect=n=>{if(!practiceDone){if(practiceQuestion?.id)markQuestionSeen(userId||'local-user',practiceQuestion.id);setPracticeAnswer(n)}};";s=s.replace(old,new,1)
-          old="const submitChallengeAnswer=n=>{const next=[...challengeAnswers,n];";new="const submitChallengeAnswer=n=>{if(testQuestion?.id)markQuestionSeen(userId||'local-user',testQuestion.id);const next=[...challengeAnswers,n];";s=s.replace(old,new,1)
-          p.write_text(s)
-          p=Path('src/SSSPortal.jsx');s=p.read_text()
-          if "getQuestionsForLevel" not in s:s=s.replace("import React,{useMemo,useState}from'react';","import React,{useMemo,useState}from'react';import{getQuestionsForLevel}from'./data/questionBank';import{freshQuestions,markQuestionSeen}from'./questionHistory';",1)
-          s=s.replace("SSS1:{label:'SSS 1',curriculum:SSS1_CURRICULUM,lessons:SSS1_LESSONS,questions:getAllSSS1PracticeQuestions()}","SSS1:{label:'SSS 1',curriculum:SSS1_CURRICULUM,lessons:SSS1_LESSONS,questions:getQuestionsForLevel('SSS1')}")
-          s=s.replace("SSS2:{label:'SSS 2',curriculum:SSS2_CURRICULUM,lessons:SSS2_LESSONS,questions:[...getAllSSS2PracticeQuestions(),...flattenExtra(SSS2_EXTRA_PRACTICE),...flattenExtra(SSS2_EXTRA2_PRACTICE)]}","SSS2:{label:'SSS 2',curriculum:SSS2_CURRICULUM,lessons:SSS2_LESSONS,questions:getQuestionsForLevel('SSS2')}")
-          s=s.replace("SSS3:{label:'SSS 3',curriculum:SSS3_CURRICULUM,lessons:SSS3_LESSONS,questions:[...getAllSSS3PracticeQuestions(),...getAllSSS3ExpandedPracticeQuestions(),...flattenExtra(SSS3_EXTRA_PRACTICE)]}","SSS3:{label:'SSS 3',curriculum:SSS3_CURRICULUM,lessons:SSS3_LESSONS,questions:getQuestionsForLevel('SSS3')}")
-          s=s.replace("const resetPractice=t=>{const all=cfg.questions.filter(x=>x.topic===t);","const resetPractice=t=>{const all=freshQuestions(localStorage.getItem('mathbridge-current-user')||'local-user',cfg.questions.filter(x=>x.topic===t));")
-          s=s.replace("const answer=n=>{if(selected!==null||!q)return;setSelected(n);","const answer=n=>{if(selected!==null||!q)return;markQuestionSeen(localStorage.getItem('mathbridge-current-user')||'local-user',q.id);setSelected(n);")
-          p.write_text(s)
-          p=Path('src/WAECNECOCBT.jsx');s=p.read_text()
-          if "getExamQuestions as getGeneratedExamQuestions" not in s:s=s.replace("import{getExamQuestions}from'./data/waecNecoQuestionBank';","import{getExamQuestions}from'./data/waecNecoQuestionBank';import{getExamQuestions as getGeneratedExamQuestions}from'./data/questionBank';",1)
-          s=s.replace("const config=useMemo(()=>createExamConfig(exam),[exam]);", "const config=useMemo(()=>createExamConfig(exam),[exam]);const loadQuestions=type=>type==='JAMB'?getGeneratedExamQuestions('JAMB',config.questionCount).map(x=>({...x,question:x.q,answer:x.options[x.answer]})):getExamQuestions(type,config.questionCount);")
-          s=s.replace("<option>WAEC</option><option>NECO</option>","<option>WAEC</option><option>NECO</option><option>JAMB</option>")
-          s=s.replace("getExamQuestions(exam,config.questionCount)","loadQuestions(exam)")
-          p.write_text(s)
-          PY
-      - name: Verify and commit
-        run: |
-          npm install --no-audit --no-fund
-          npm run verify
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add src/main.jsx src/SSSPortal.jsx src/WAECNECOCBT.jsx
-          git diff --cached --quiet || git commit -m "Lock SSS and JAMB question routing"
-          git push
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --no-audit --no-fund
+      - run: npm run verify
