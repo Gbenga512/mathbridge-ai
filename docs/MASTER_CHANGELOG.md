@@ -2,6 +2,14 @@
 
 This is the running record of major MathBridge product, architecture, security, curriculum, deployment, and documentation decisions.
 
+## 2026-09-15 — Production email confirmation redirect
+
+- Identified the student signup confirmation failure: Supabase was redirecting confirmed users to `http://localhost:3000`, which is only reachable from the development machine.
+- Updated `src/cloudProgress.js` so student signup explicitly requests the production MathBridge redirect URL: `https://mathbridge-ai-eight.vercel.app/`.
+- This prevents email confirmation links generated from the local development environment from sending phone users to the local laptop server.
+- The Supabase Auth Redirect URL allow-list must include the production URL for the explicit redirect to be accepted.
+- The existing localhost URL may remain configured for local development.
+
 ## 2026-09-15 — Documentation foundation
 
 - Established GitHub-based living documentation for MathBridge.
