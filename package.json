@@ -2,7 +2,7 @@
   "name":"mathbridge-ai",
   "version":"1.2.0",
   "private":true,
-  "scripts":{"dev":"vite","build":"vite build","verify:question-banks":"node scripts/verify-question-banks.mjs","verify:question-selection":"node scripts/question-selection-qa.mjs","verify:learning-flow":"node scripts/verify-learning-flow.mjs","verify":"npm run verify:question-banks && npm run verify:question-selection && npm run verify:learning-flow && npm run build","preview":"vite preview"},
+  "scripts":{"dev":"vite","build":"vite build","verify:question-banks":"node scripts/verify-question-banks.mjs","verify:question-quality":"node scripts/verify-question-quality.mjs","verify:question-selection":"node scripts/question-selection-qa.mjs","verify:learning-flow":"node scripts/verify-learning-flow.mjs","verify":"npm run verify:question-banks && npm run verify:question-quality && npm run verify:question-selection && npm run verify:learning-flow && npm run build","preview":"vite preview"},
   "dependencies":{"@supabase/supabase-js":"latest","@vitejs/plugin-react":"latest","vite":"latest","react":"latest","react-dom":"latest"},
   "devDependencies":{}
 }
