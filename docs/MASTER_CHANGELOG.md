@@ -20,15 +20,15 @@ This is the running record of major MathBridge product, architecture, security, 
 - Added Site Manager dashboard service and portal.
 - Integrated Site Manager routing through the School Portal entry point.
 - Owner role provisioning is intended to be controlled and not exposed through public signup.
-- The platform-owner SQL migration still needs to be executed in the live Supabase SQL Editor before the owner role is operational in production.
+- The platform-owner SQL migration has now been executed in the live MathBridge Supabase project.
 
 ## 2026-09-15 — Persistent question-history foundation
 
 - Added `supabase/student_question_history.sql` to provide persistent per-student question exposure history.
 - Added protected database functions for recording question exposure, recording answer outcomes, and retrieving seen question IDs.
 - Updated `src/questionHistory.js` with a Supabase-backed implementation while retaining local fallback behavior.
-- The migration is repository-ready but must be executed in the live Supabase project before cloud history becomes active.
-- Full no-repeat behavior is not yet marked complete until the main diagnostic/practice/mastery selection flow is integrated with the service and tested across devices.
+- The live MathBridge Supabase project now contains the persistent question-history table and canonical RPC contract.
+- Full no-repeat behavior is not yet marked complete until practice/mastery/test/exam selection flows are integrated and tested across devices.
 
 ## 2026-09-15 — Persistent diagnostic selection integration
 
@@ -37,7 +37,6 @@ This is the running record of major MathBridge product, architecture, security, 
 - Integrated diagnostic selection into the main learning flow.
 - Diagnostic question exposure is recorded for authenticated students through the Supabase question-history RPC and locally for anonymous/degraded sessions.
 - Added `scripts/question-selection-qa.mjs` and wired it into the CI verification path.
-- The persistent cloud migration still must be executed in live Supabase before cross-device history can be considered fully operational.
 
 ## 2026-09-15 — Secure School Test Centre foundation
 
@@ -46,17 +45,25 @@ This is the running record of major MathBridge product, architecture, security, 
 - Added security-definer `start_school_test` and `submit_school_test` RPCs so test start state and objective marking are performed server-side.
 - Replaced broad student write access to test assignments/attempts with student read-only access; school staff retain administrative management access.
 - Added student policies for reading only published tests they are assigned to and their question snapshots.
-- The secure-test migration has now been executed in the live MathBridge Supabase project and verified by schema inspection.
+- The secure-test migration has been executed in the live MathBridge Supabase project.
 
 ## 2026-09-15 — Live Supabase security hardening
 
 - Added explicit RLS policies for parent/teacher relationships and school operational tables.
-- Removed anonymous execute access from privileged school, platform-owner, and question-history RPCs.
-- Verified through PostgreSQL privilege inspection that the protected RPCs are not executable by `anon` and are available only to authenticated application flows.
-- Added a database trigger preventing ordinary authenticated users from changing their own platform role, closing the self-promotion path to `site_manager`.
+- Removed anonymous execute access from privileged school, platform-owner, question-history, and test RPCs.
+- Verified PostgreSQL function ACLs for the protected application RPCs.
+- Added a database trigger preventing ordinary authenticated users from changing their own protected platform role.
 - Added protected school audit-log access for authorized school administrators.
 - Supabase Security Advisor no longer reports the previous RLS-enabled/no-policy findings.
 - Remaining Security Advisor warnings are intentional signed-in access to SECURITY DEFINER RPCs plus the separate Auth leaked-password-protection setting.
+
+## 2026-09-15 — Secure test submission hardening
+
+- Identified and corrected a PL/pgSQL variable/column naming collision in the live `submit_school_test` function that could make score persistence ambiguous.
+- Renamed scoring variables and explicitly qualified the attempt update target.
+- Added server-side enforcement of `duration_minutes` using the persisted test start time.
+- The browser can no longer extend a timed school test by manipulating its local timer.
+- Updated `supabase/secure_school_tests.sql` and added `supabase/security_hardening.sql` to keep repository documentation aligned with the production security model.
 
 ## 2026-09-15 — CI failure diagnosis and repair
 
