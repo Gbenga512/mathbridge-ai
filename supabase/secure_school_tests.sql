@@ -20,14 +20,17 @@ drop policy if exists "school test items staff" on public.school_test_items;
 drop policy if exists "school assignments student or staff" on public.school_test_assignments;
 drop policy if exists "school attempts student or staff" on public.school_test_attempts;
 
-create policy "school tests staff manage" on public.school_tests for all using(public.is_school_staff(school_id)) with check(public.is_school_staff(school_id));
-create policy "school tests assigned student read" on public.school_tests for select using(status='published' and exists(select 1 from public.school_test_assignments a where a.test_id=id and a.student_id=auth.uid()));
-create policy "school test items staff manage" on public.school_test_items for all using(exists(select 1 from public.school_tests t where t.id=test_id and public.is_school_staff(t.school_id))) with check(exists(select 1 from public.school_tests t where t.id=test_id and public.is_school_staff(t.school_id)));
-create policy "school test items assigned student read" on public.school_test_items for select using(exists(select 1 from public.school_test_assignments a join public.school_tests t on t.id=a.test_id where a.test_id=test_id and a.student_id=auth.uid() and t.status='published'));
-create policy "school assignments staff manage" on public.school_test_assignments for all using(exists(select 1 from public.school_tests t where t.id=test_id and public.is_school_staff(t.school_id))) with check(exists(select 1 from public.school_tests t where t.id=test_id and public.is_school_staff(t.school_id)));
-create policy "school assignments student read" on public.school_test_assignments for select using(auth.uid()=student_id);
-create policy "school attempts staff read" on public.school_test_attempts for select using(exists(select 1 from public.school_test_assignments a join public.school_tests t on t.id=a.test_id where a.id=assignment_id and public.is_school_staff(t.school_id)));
-create policy "school attempts student read" on public.school_test_attempts for select using(auth.uid()=student_id);
+-- IMPORTANT: these staff policies use the dedicated SECURITY DEFINER helper.
+-- Calling is_school_staff() from an RLS policy would fail for clients after
+-- its EXECUTE privilege was intentionally revoked during security hardening.
+create policy "school tests staff manage" on public.school_tests for all using((select public.is_school_test_staff(id))) with check((select public.is_school_test_staff(id)));
+create policy "school tests assigned student read" on public.school_tests for select using(status='published' and exists(select 1 from public.school_test_assignments a where a.test_id=school_tests.id and a.student_id=auth.uid()));
+create policy "school test items staff manage" on public.school_test_items for all using((select public.is_school_test_staff(test_id))) with check((select public.is_school_test_staff(test_id)));
+create policy "school test items assigned student read" on public.school_test_items for select using(exists(select 1 from public.school_test_assignments a join public.school_tests t on t.id=a.test_id where a.test_id=school_test_items.test_id and a.student_id=auth.uid() and t.status='published'));
+create policy "school assignments staff manage" on public.school_test_assignments for all using((select public.is_school_test_staff(test_id))) with check((select public.is_school_test_staff(test_id)));
+create policy "school assignments student read" on public.school_test_assignments for select using((select auth.uid())=student_id);
+create policy "school attempts staff read" on public.school_test_attempts for select using(exists(select 1 from public.school_test_assignments a where a.id=assignment_id and (select public.is_school_test_staff(a.test_id))));
+create policy "school attempts student read" on public.school_test_attempts for select using((select auth.uid())=student_id);
 
 create or replace function public.start_school_test(p_assignment_id uuid) returns jsonb language plpgsql security definer set search_path=public as $$
 declare v_assignment public.school_test_assignments%rowtype; v_test public.school_tests%rowtype; v_attempt public.school_test_attempts%rowtype;
@@ -62,7 +65,7 @@ begin
   if v_test.duration_minutes is not null and now()>v_started_at+make_interval(mins=>v_test.duration_minutes) then raise exception 'Test time has expired'; end if;
   for v_item in select i.id,i.points,k.answer from public.school_test_items i join public.school_test_answer_keys k on k.item_id=i.id where i.test_id=v_test.id order by i.position loop
     v_total:=v_total+coalesce(v_item.points,0); v_count:=v_count+1;
-    if p_answers ? v_item.id::text then begin v_answer:=(p_answers->>v_item.id::text)::integer; exception when others then v_answer:=null; end; else v_answer:=null; end if;
+    if p_answers ? v_item.id::text then begin v_answer:=(p_answers->>v_item.id::text)::integer; exception when others then v_answer:=null; end if; else v_answer:=null; end if;
     if v_answer is not null and v_answer=v_item.answer then v_score:=v_score+coalesce(v_item.points,0); end if;
   end loop;
   if v_total>0 then v_percentage:=round((v_score/v_total)*100,2); end if;
