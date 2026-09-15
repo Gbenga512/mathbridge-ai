@@ -5,28 +5,26 @@ on:
     paths:
       - 'src/data/questionBank.js'
       - 'src/questionHistory.js'
+      - 'src/SSSPortal.jsx'
       - '.github/workflows/restore-class-question-routing.yml'
   workflow_dispatch:
 permissions:
   contents: write
 jobs:
-  patch-main:
+  patch-routing:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
-      - name: Patch main question routing and no-repeat history
+        with: {fetch-depth: 1}
+      - name: Patch application routing and history
         run: |
           python - <<'PY'
           from pathlib import Path
           p=Path('src/main.jsx');s=p.read_text()
           if "./questionHistory" not in s:
-              anchor="import{getSession,getProgress as getCloudProgress,saveCloudProgress}from'./cloudProgress';"
-              s=s.replace(anchor,anchor+"import{freshQuestions,markQuestionSeen,markQuestionsSeen}from'./questionHistory';",1)
-          s=s.replace("const randomDiagnostic=(questions,count=10)=>", "const randomDiagnostic=(questions,count=10)=>")
-          old="const selectedLevel=levelOptions.find(x=>x.value===level)||levelOptions[0];const levelTopics=curriculum.jss?.levels?.[level]?.topics||curriculum.primary?.levels?.[level]?.topics||curriculum.sss?.levels?.[level]?.topics||[];const questions=getQuestionsForLevel(level);const diagnosticQuestions=useMemo(()=>randomDiagnostic(questions,10),[questions,sessionSeed]);"
-          new="const selectedLevel=levelOptions.find(x=>x.value===level)||levelOptions[0];const levelTopics=curriculum.jss?.levels?.[level]?.topics||curriculum.primary?.levels?.[level]?.topics||curriculum.sss?.levels?.[level]?.topics||[];const questions=getQuestionsForLevel(level);const freshBank=useMemo(()=>freshQuestions(userId||'local-user',questions),[userId,questions]);const diagnosticQuestions=useMemo(()=>randomDiagnostic(freshBank.length>=10?freshBank:questions,10),[freshBank,questions,sessionSeed,userId]);"
+              s=s.replace("import{getSession,getProgress as getCloudProgress,saveCloudProgress}from'./cloudProgress';","import{getSession,getProgress as getCloudProgress,saveCloudProgress}from'./cloudProgress';import{freshQuestions,markQuestionSeen}from'./questionHistory';",1)
+          old="const questions=getQuestionsForLevel(level);const diagnosticQuestions=useMemo(()=>randomDiagnostic(questions,10),[questions,sessionSeed]);"
+          new="const questions=getQuestionsForLevel(level);const freshBank=useMemo(()=>freshQuestions(userId||'local-user',questions),[userId,questions]);const diagnosticQuestions=useMemo(()=>randomDiagnostic(freshBank.length>=10?freshBank:questions,10),[freshBank,questions,sessionSeed,userId]);"
           if old in s:s=s.replace(old,new,1)
           old="const answer=n=>setAnswers({...answers,[diagnosticQuestions[i].id]:n});"
           new="const answer=n=>{const id=diagnosticQuestions[i]?.id;if(id)markQuestionSeen(userId||'local-user',id);setAnswers({...answers,[id]:n});};"
@@ -38,6 +36,15 @@ jobs:
           new="const submitChallengeAnswer=n=>{if(testQuestion?.id)markQuestionSeen(userId||'local-user',testQuestion.id);const next=[...challengeAnswers,n];"
           if old in s:s=s.replace(old,new,1)
           p.write_text(s)
+          p=Path('src/SSSPortal.jsx');s=p.read_text()
+          if "getQuestionsForLevel" not in s:
+              s=s.replace("import React,{useMemo,useState}from'react';","import React,{useMemo,useState}from'react';import{getQuestionsForLevel}from'./data/questionBank';import{freshQuestions,markQuestionSeen}from'./questionHistory';",1)
+          s=s.replace("SSS1:{label:'SSS 1',curriculum:SSS1_CURRICULUM,lessons:SSS1_LESSONS,questions:getAllSSS1PracticeQuestions()}","SSS1:{label:'SSS 1',curriculum:SSS1_CURRICULUM,lessons:SSS1_LESSONS,questions:getQuestionsForLevel('SSS1')}")
+          s=s.replace("SSS2:{label:'SSS 2',curriculum:SSS2_CURRICULUM,lessons:SSS2_LESSONS,questions:[...getAllSSS2PracticeQuestions(),...flattenExtra(SSS2_EXTRA_PRACTICE),...flattenExtra(SSS2_EXTRA2_PRACTICE)]}","SSS2:{label:'SSS 2',curriculum:SSS2_CURRICULUM,lessons:SSS2_LESSONS,questions:getQuestionsForLevel('SSS2')}")
+          s=s.replace("SSS3:{label:'SSS 3',curriculum:SSS3_CURRICULUM,lessons:SSS3_LESSONS,questions:[...getAllSSS3PracticeQuestions(),...getAllSSS3ExpandedPracticeQuestions(),...flattenExtra(SSS3_EXTRA_PRACTICE)]}","SSS3:{label:'SSS 3',curriculum:SSS3_CURRICULUM,lessons:SSS3_LESSONS,questions:getQuestionsForLevel('SSS3')}")
+          s=s.replace("const resetPractice=t=>{const all=cfg.questions.filter(x=>x.topic===t);","const resetPractice=t=>{const all=freshQuestions(localStorage.getItem('mathbridge-current-user')||'local-user',cfg.questions.filter(x=>x.topic===t));")
+          s=s.replace("const answer=n=>{if(selected!==null||!q)return;setSelected(n);","const answer=n=>{if(selected!==null||!q)return;markQuestionSeen(localStorage.getItem('mathbridge-current-user')||'local-user',q.id);setSelected(n);")
+          p.write_text(s)
           PY
       - name: Verify and commit
         run: |
@@ -45,6 +52,6 @@ jobs:
           npm run verify
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add src/main.jsx
-          git diff --cached --quiet || git commit -m "Enforce persistent no-repeat question history"
+          git add src/main.jsx src/SSSPortal.jsx
+          git diff --cached --quiet || git commit -m "Enforce locked question routing and no-repeat history"
           git push
