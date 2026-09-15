@@ -2,14 +2,21 @@
 
 This is the running record of major MathBridge product, architecture, security, curriculum, deployment, and documentation decisions.
 
+## 2026-09-15 — CI/CD workflow hardening
+
+- Replaced the self-modifying class-routing GitHub Actions workflow with read-only regression QA.
+- Replaced the self-modifying curriculum-wording workflow with read-only build QA.
+- Production CI now verifies the application rather than editing source files automatically during a build.
+- This prevents automated commits from racing with development changes and reduces the risk of the repeated GitHub Actions failure emails seen during the earlier patch workflows.
+
 ## 2026-09-15 — Student class selection and persistence
 
 - Corrected the student onboarding flow so class is no longer silently fixed to JSS 1 during account creation.
 - Added a required class selector covering Primary 1–6, JSS 1–3, and SSS 1–3.
-- The selected class is stored in the student's Supabase profile as `class_level` during signup.
-- The authenticated application now reads the protected profile class and uses it as the learner's active curriculum level.
+- The selected class is stored in the student's Supabase profile as `class_level` through the secure `set_student_class` RPC after authentication.
+- The authenticated application reads the protected profile class and uses it as the learner's active curriculum level.
 - The selected class is also cached locally for a consistent reload experience.
-- The student dashboard now displays the actual selected class instead of hardcoded JSS 1.
+- The student dashboard displays the actual selected class instead of hardcoded JSS 1.
 
 ## 2026-09-15 — Role-aware authentication portal routing
 
