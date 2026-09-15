@@ -1,50 +1,16 @@
 // MathBridge master question-bank registry.
 // LOCKED STANDARD: every school level has >=1,000 original curriculum questions.
 // Examination-style banks are separate from genuine past-paper material.
-import {primary1Questions} from './primary1Math';
-import {primary2Questions} from './primary2Math';
-import {primary3Questions} from './primary3Math';
-import {primary4Questions} from './primary4Math';
-import {primary5Questions} from './primary5Math';
-import {primary6Questions} from './primary6Math';
-import {jss1Questions} from './jss1Math';
-import {jss2Questions} from './jss2Math';
-import {jss3Questions} from './jss3Math';
-import {curriculum} from './curriculum';
-import {generateCurriculumBank,generateExamBank} from './questionFactory';
-
-export const QUESTION_BANK_STANDARD=Object.freeze({
- minimumPerClass:1000,
- schoolLevels:['P1','P2','P3','P4','P5','P6','JSS1','JSS2','JSS3','SSS1','SSS2','SSS3'],
- examBanks:['WAEC','NECO','JAMB'],
- minimumPerExam:1000,
- noAccidentalRepeats:true,
- sourceLabels:Object.freeze({CURRICULUM_ORIGINAL:'MathBridge original curriculum question',WAEC_STYLE_ORIGINAL:'MathBridge original WAEC-style question',NECO_STYLE_ORIGINAL:'MathBridge original NECO-style question',JAMB_STYLE_ORIGINAL:'MathBridge original JAMB-style question'})
-});
-
+import{primary1Questions}from'./primary1Math';import{primary2Questions}from'./primary2Math';import{primary3Questions}from'./primary3Math';import{primary4Questions}from'./primary4Math';import{primary5Questions}from'./primary5Math';import{primary6Questions}from'./primary6Math';import{jss1Questions}from'./jss1Math';import{jss2Questions}from'./jss2Math';import{jss3Questions}from'./jss3Math';
+import{curriculum}from'./curriculum';import{SSS1_CURRICULUM}from'./sss1Curriculum';import{SSS2_CURRICULUM}from'./sss2Curriculum';import{SSS3_CURRICULUM}from'./sss3Curriculum';import{generateCurriculumBank,generateExamBank}from'./questionFactory';
+export const QUESTION_BANK_STANDARD=Object.freeze({minimumPerClass:1000,schoolLevels:['P1','P2','P3','P4','P5','P6','JSS1','JSS2','JSS3','SSS1','SSS2','SSS3'],examBanks:['WAEC','NECO','JAMB'],minimumPerExam:1000,noAccidentalRepeats:true,sourceLabels:Object.freeze({CURRICULUM_ORIGINAL:'MathBridge original curriculum question',WAEC_STYLE_ORIGINAL:'MathBridge original WAEC-style question',NECO_STYLE_ORIGINAL:'MathBridge original NECO-style question',JAMB_STYLE_ORIGINAL:'MathBridge original JAMB-style question'})});
 const existing={P1:primary1Questions,P2:primary2Questions,P3:primary3Questions,P4:primary4Questions,P5:primary5Questions,P6:primary6Questions,JSS1:jss1Questions,JSS2:jss2Questions,JSS3:jss3Questions};
 const levelTopics=level=>Object.values(curriculum).find(group=>group.levels[level])?.levels?.[level]?.topics||[];
+const sssTopics={SSS1:Object.values(SSS1_CURRICULUM).flatMap(x=>x.topics),SSS2:Object.values(SSS2_CURRICULUM).flatMap(x=>x.topics),SSS3:Object.values(SSS3_CURRICULUM).flatMap(x=>x.topics)};
+const sssTerm={SSS1:Object.fromEntries(Object.entries(SSS1_CURRICULUM).flatMap(([term,x])=>x.topics.map(topic=>[topic,term]))),SSS2:Object.fromEntries(Object.entries(SSS2_CURRICULUM).flatMap(([term,x])=>x.topics.map(topic=>[topic,term]))),SSS3:Object.fromEntries(Object.entries(SSS3_CURRICULUM).flatMap(([term,x])=>x.topics.map(topic=>[topic,term])))};
 const termFor=(index,count)=>`T${Math.min(3,Math.floor(index/(count/3))+1)}`;
-const annotate=(items,level)=>items.map((item,index)=>({...item,classLevel:level,term:termFor(index,items.length),week:Math.floor((index%30)/2)+1,sourceType:item.sourceType||'CURRICULUM_ORIGINAL'}));
-
-const buildLevel=(level)=>{
- const topics=levelTopics(level);
- const generated=generateCurriculumBank(level,topics,1000);
- const seeds=(existing[level]||[]).map(x=>({...x,sourceType:'CURRICULUM_ORIGINAL'}));
- const merged=[...seeds,...generated];
- const seen=new Set();
- return annotate(merged.filter(x=>{if(seen.has(x.id))return false;seen.add(x.id);return true}).slice(0,1000),level);
-};
-
-export const classQuestionBanks=Object.freeze({
- P1:buildLevel('P1'),P2:buildLevel('P2'),P3:buildLevel('P3'),P4:buildLevel('P4'),P5:buildLevel('P5'),P6:buildLevel('P6'),
- JSS1:buildLevel('JSS1'),JSS2:buildLevel('JSS2'),JSS3:buildLevel('JSS3'),
- SSS1:annotate(generateCurriculumBank('SSS1',levelTopics('SSS1'),1000),'SSS1'),
- SSS2:annotate(generateCurriculumBank('SSS2',levelTopics('SSS2'),1000),'SSS2'),
- SSS3:annotate(generateCurriculumBank('SSS3',levelTopics('SSS3'),1000),'SSS3')
-});
-
+const annotate=(items,level)=>items.map((item,index)=>({...item,classLevel:level,term:sssTerm[level]?.[item.topic]||termFor(index,items.length),week:(index%12)+1,sourceType:item.sourceType||'CURRICULUM_ORIGINAL'}));
+const buildLevel=level=>{const topics=sssTopics[level]||levelTopics(level);const generated=generateCurriculumBank(level,topics,1000);const seeds=(existing[level]||[]).map(x=>({...x,sourceType:'CURRICULUM_ORIGINAL'}));const merged=[...seeds,...generated],seen=new Set();return annotate(merged.filter(x=>{if(seen.has(x.id))return false;seen.add(x.id);return true}).slice(0,1000),level)};
+export const classQuestionBanks=Object.freeze({P1:buildLevel('P1'),P2:buildLevel('P2'),P3:buildLevel('P3'),P4:buildLevel('P4'),P5:buildLevel('P5'),P6:buildLevel('P6'),JSS1:buildLevel('JSS1'),JSS2:buildLevel('JSS2'),JSS3:buildLevel('JSS3'),SSS1:annotate(generateCurriculumBank('SSS1',sssTopics.SSS1,1000),'SSS1'),SSS2:annotate(generateCurriculumBank('SSS2',sssTopics.SSS2,1000),'SSS2'),SSS3:annotate(generateCurriculumBank('SSS3',sssTopics.SSS3,1000),'SSS3')});
 export const examQuestionBanks=Object.freeze({WAEC:generateExamBank('WAEC',1000),NECO:generateExamBank('NECO',1000),JAMB:generateExamBank('JAMB',1000)});
-export const getQuestionsForLevel=level=>classQuestionBanks[level]||[];
-export const getExamQuestions=exam=>examQuestionBanks[exam]||[];
-export const getQuestionBankStats=()=>({classes:Object.fromEntries(Object.entries(classQuestionBanks).map(([k,v])=>[k,v.length])),exams:Object.fromEntries(Object.entries(examQuestionBanks).map(([k,v])=>[k,v.length])),total:Object.values(classQuestionBanks).flat().length+Object.values(examQuestionBanks).flat().length});
+export const getQuestionsForLevel=level=>classQuestionBanks[level]||[];export const getExamQuestions=exam=>examQuestionBanks[exam]||[];export const getQuestionBankStats=()=>({classes:Object.fromEntries(Object.entries(classQuestionBanks).map(([k,v])=>[k,v.length])),exams:Object.fromEntries(Object.entries(examQuestionBanks).map(([k,v])=>[k,v.length])),total:Object.values(classQuestionBanks).flat().length+Object.values(examQuestionBanks).flat().length});
