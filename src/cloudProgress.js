@@ -5,7 +5,7 @@ const KEY='mathbridge-cloud-progress';
 const PRODUCTION_AUTH_REDIRECT='https://mathbridge-ai-eight.vercel.app/';
 const getAuthRedirect=()=>PRODUCTION_AUTH_REDIRECT;
 const localGet=(userId)=>{try{return JSON.parse(localStorage.getItem(`${KEY}:${userId}`)||'null')}catch{return null}};
-const localSave=(userId,progress)=>{try{localStorage.setItem(`${KEY}:${userId}`,JSON.stringify({...progress,updatedAt:new Date().toISOString()}));return {ok:true,mode:'local'};}catch{return {ok:false,mode:'local'}}};
+const localSave=(userId,progress)=>{try{return localStorage.setItem(`${KEY}:${userId}`,JSON.stringify({...progress,updatedAt:new Date().toISOString()})),{ok:true,mode:'local'}}catch{return {ok:false,mode:'local'}}};
 
 export async function signUpStudent({email,password,fullName,classLevel}){
  if(!supabaseConfigured)return {data:null,error:new Error('Supabase is not configured yet.')};
@@ -16,6 +16,13 @@ export async function signUpStudent({email,password,fullName,classLevel}){
 export async function signInStudent(email,password){if(!supabaseConfigured)return {data:null,error:new Error('Supabase is not configured yet.')};return await supabase.auth.signInWithPassword({email,password});}
 export async function signOutStudent(){if(supabaseConfigured)return await supabase.auth.signOut();return {error:null};}
 export async function getSession(){if(supabaseConfigured)return (await supabase.auth.getSession()).data.session;return null;}
+export async function getUserProfile(userId){
+ if(supabaseConfigured&&userId){
+  const {data,error}=await supabase.from('profiles').select('id,role,full_name,class_level').eq('id',userId).maybeSingle();
+  if(!error&&data)return data;
+ }
+ return null;
+}
 
 export async function getProgress(userId='local-user'){
  if(supabaseConfigured&&userId&&userId!=='local-user'){
