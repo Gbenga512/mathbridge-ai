@@ -66,6 +66,22 @@ This is the running record of major MathBridge product, architecture, security, 
 - Supabase Security Advisor no longer reports the previous RLS-enabled/no-policy findings.
 - Remaining Security Advisor warnings are intentional signed-in access to SECURITY DEFINER RPCs plus the separate Auth leaked-password-protection setting.
 
+## 2026-09-15 — Live RPC permission hardening
+
+- Reviewed live `SECURITY DEFINER` functions and distinguished internal helper functions from intentionally client-callable application RPCs.
+- Revoked `EXECUTE` from authenticated/anonymous roles for internal helpers including role checks, seat calculations, and the user-creation trigger.
+- Preserved authenticated execution only for application RPCs that the frontend intentionally invokes for question history, school enrollment/removal, Site Manager dashboard access, and secure test start/submission.
+- Rechecked RLS after the change; protected application tables continue to have RLS policies.
+- Supabase Security Advisor reduced the signed-in `SECURITY DEFINER` warning set from 14 functions to 8 intentionally callable application RPCs.
+
+## 2026-09-15 — Platform owner live provisioning
+
+- Verified the live MathBridge `profiles` table and identified the existing owner account.
+- Provisioned that account as `site_manager` directly in the live database rather than exposing owner-role selection through signup.
+- Verified the live profile now carries the protected `site_manager` role.
+- Updated the protected role-change trigger so ordinary authenticated users cannot alter protected roles while trusted database administration can provision the owner role.
+- A direct SQL call to the Site Manager dashboard RPC without an authenticated user context correctly failed with `Platform owner access required`; this confirms the RPC is enforcing its caller check rather than exposing dashboard data to unauthenticated database calls.
+
 ## 2026-09-15 — Secure test submission hardening
 
 - Identified and corrected a PL/pgSQL variable/column naming collision in the live `submit_school_test` function that could make score persistence ambiguous.
@@ -86,7 +102,7 @@ This is the running record of major MathBridge product, architecture, security, 
 
 ## Earlier production foundations
 
-- GitHub repository: `Gbenga512/mathbridge-ai`.
+- GitHub repository: `mathbridge-ai`.
 - Vercel deployment is connected to GitHub for automatic deployments.
 - Production Supabase environment variables are configured through Vercel.
 - Curriculum structures cover Primary 1–6, JSS 1–3, and SSS 1–3.
