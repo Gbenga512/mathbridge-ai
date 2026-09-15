@@ -2,6 +2,14 @@
 
 This is the running record of major MathBridge product, architecture, security, curriculum, deployment, and documentation decisions.
 
+## 2026-09-15 — Role-aware authentication portal routing
+
+- Extended the authentication flow to resolve the authenticated user's protected role from `profiles` after sign-in.
+- Student accounts continue into the personal learning dashboard.
+- Platform and school roles are no longer silently treated as student learning accounts after authentication.
+- Authenticated non-student roles are routed into the existing authorized `SchoolPortal`, which delegates to the appropriate Site Manager, Site Administrator, School Administrator, Teacher, or other role-specific experience.
+- This protects the platform-owner account from accidentally entering the student diagnostic flow while preserving the existing account and data model.
+
 ## 2026-09-15 — Production RLS and database performance hardening
 
 - Applied a live Supabase migration to optimize the affected RLS policies by wrapping `auth.uid()`/authentication evaluation in a scalar `SELECT`, preventing repeated per-row initialization at scale.
