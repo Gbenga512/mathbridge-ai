@@ -39,6 +39,15 @@ This is the running record of major MathBridge product, architecture, security, 
 - Added `scripts/question-selection-qa.mjs` and wired it into the CI verification path.
 - The persistent cloud migration still must be executed in live Supabase before cross-device history can be considered fully operational.
 
+## 2026-09-15 — Secure School Test Centre foundation
+
+- Added `supabase/secure_school_tests.sql` as the production security migration for the School Test Centre.
+- Added a protected `school_test_answer_keys` table so answer keys are not part of student-readable test records.
+- Added security-definer `start_school_test` and `submit_school_test` RPCs so test start state and objective marking are performed server-side.
+- Replaced broad student write access to test assignments/attempts with student read-only access; school staff retain administrative management access.
+- Added student policies for reading only published tests they are assigned to and their question snapshots.
+- The secure-test migration is repository-ready but must be executed and verified in the live Supabase project before the Test Centre can be considered production-complete.
+
 ## 2026-09-15 — CI failure diagnosis and repair
 
 - Investigated the repeated **Primary and JSS Curriculum QA** failures shown in GitHub Actions.
@@ -47,7 +56,7 @@ This is the running record of major MathBridge product, architecture, security, 
 - Consequently `npm ci` and all curriculum QA/build steps were skipped.
 - Updated `.github/workflows/primary1-qa.yml` to remove lockfile-dependent npm caching and use `npm install` so the existing repository can run its QA suite.
 - The Node runtime was subsequently aligned with the current dependency requirements.
-- The latest full Primary/JSS QA run passed, including the production build.
+- The latest full Primary/JSS QA run passed, including question-selection QA and the production build.
 
 ## Earlier production foundations
 
