@@ -22,6 +22,14 @@ This is the running record of major MathBridge product, architecture, security, 
 - Owner role provisioning is intended to be controlled and not exposed through public signup.
 - The platform-owner SQL migration still needs to be executed in the live Supabase SQL Editor before the owner role is operational in production.
 
+## 2026-09-15 — Persistent question-history foundation
+
+- Added `supabase/student_question_history.sql` to provide persistent per-student question exposure history.
+- Added protected database functions for recording question exposure, recording answer outcomes, and retrieving seen question IDs.
+- Updated `src/questionHistory.js` with a Supabase-backed implementation while retaining local fallback behavior.
+- The migration is repository-ready but must be executed in the live Supabase project before cloud history becomes active.
+- Full no-repeat behavior is not yet marked complete until the main diagnostic/practice/mastery selection flow is integrated with the service and tested across devices.
+
 ## Earlier production foundations
 
 - GitHub repository: `Gbenga512/mathbridge-ai`.
