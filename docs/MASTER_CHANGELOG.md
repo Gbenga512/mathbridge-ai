@@ -2,12 +2,21 @@
 
 This is the running record of major MathBridge product, architecture, security, curriculum, deployment, and documentation decisions.
 
+## 2026-09-15 — Question engine production expansion
+
+- Reworked `src/data/questionFactory.js` from a small set of repetitive templates into multiple curriculum-family generators.
+- Added dedicated generation families for sets, fractions, statistics, geometry, algebra, indices, sequences, functions, matrices, counting, vectors, trigonometry, calculus, financial mathematics, and general number skills.
+- Added multiple question forms per family, deterministic parameter variation, progressive difficulty labels, explicit learning objectives, explanations, and four distinct answer options.
+- Preserved the rule that WAEC/NECO/JAMB banks contain original examination-style questions and are not presented as official past questions.
+- Kept the production baseline at 2,000 questions per school class and 2,000 per examination-style bank.
+- Strengthened `scripts/verify-question-banks.mjs` to validate minimum counts, duplicate IDs/text, four unique options, valid answer indexes, class tags, terms, difficulty, explanations, objectives, and exam metadata.
+
 ## 2026-09-15 — CI/CD workflow hardening
 
 - Replaced the self-modifying class-routing GitHub Actions workflow with read-only regression QA.
 - Replaced the self-modifying curriculum-wording workflow with read-only build QA.
 - Production CI now verifies the application rather than editing source files automatically during a build.
-- This prevents automated commits from racing with development changes and reduces the risk of the repeated GitHub Actions failure emails seen during the earlier patch workflows.
+- This prevents automated commits from racing with development changes and reduces the risk of repeated workflow-generated failure emails.
 
 ## 2026-09-15 — Student class selection and persistence
 
@@ -20,10 +29,10 @@ This is the running record of major MathBridge product, architecture, security, 
 
 ## 2026-09-15 — Role-aware authentication portal routing
 
-- Extended the authentication flow to resolve the authenticated user's protected role from `profiles` after sign-in.
+- Extended authentication to resolve the protected role from `profiles` after sign-in.
 - Student accounts continue into the personal learning dashboard.
-- Platform and school roles are no longer silently treated as student learning accounts after authentication.
-- Authenticated non-student roles are routed into the existing authorized `SchoolPortal`.
+- Platform and school roles are no longer silently treated as student learning accounts.
+- Authenticated non-student roles are routed into the authorized `SchoolPortal`.
 
 ## 2026-09-15 — Mastery continuation regression fix
 
@@ -35,7 +44,6 @@ This is the running record of major MathBridge product, architecture, security, 
 
 - Applied a live Supabase migration to optimize affected RLS policies and add production foreign-key indexes.
 - Previous 15 Auth RLS initialization-plan warnings were cleared.
-- Remaining unused-index notices are informational and retained until real traffic establishes their usefulness.
 - Internal SECURITY DEFINER helper execution remains restricted.
 
 ## 2026-09-15 — School Test Centre RLS recursion fix
@@ -53,7 +61,7 @@ This is the running record of major MathBridge product, architecture, security, 
 
 - Added persistent per-student question exposure history and protected RPCs.
 - Diagnostic selection prefers unseen questions and records authenticated student exposure.
-- Full persistent no-repeat behavior remains a QA checkpoint until real student activity is exercised across the visible learning flows.
+- Full persistent no-repeat behavior remains a QA checkpoint until real student activity is exercised across visible learning flows.
 
 ## 2026-09-15 — Learning engine foundation
 
