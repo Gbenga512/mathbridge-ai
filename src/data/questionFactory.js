@@ -1,116 +1,109 @@
 // MathBridge production question factory.
-// Creates original, curriculum-aligned questions. Foreign resources may inform
-// topic coverage and pedagogy, but their question wording is never copied.
-const hash=s=>{let h=2166136261;for(let i=0;i<String(s).length;i++){h^=String(s).charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0};
-const rand=(seed,min,max)=>min+hash(seed)%(Math.max(1,max-min+1));
-const shuffle=(arr,seed)=>{const a=[...arr];for(let i=a.length-1;i>0;i--){const j=hash(`${seed}-${i}`)%(i+1);[a[i],a[j]]=[a[j],a[i]]}return a};
-const options=(correct,seed,step=1)=>{const c=Number(correct),s=new Set([c]);for(let k=1;s.size<4;k++){const d=((hash(`${seed}-d-${k}`)%7)+1)*step;s.add(c+(k%2?d:-d))}return shuffle([...s],seed)};
-const q=(id,topic,text,correct,explanation,difficulty,objective,step=1)=>{const os=options(correct,`${id}-${correct}`,step);return{id,topic,q:text,options:os,answer:os.indexOf(Number(correct)),explanation,difficulty,objective,sourceType:'CURRICULUM_ORIGINAL'}};
-const difficultyFor=(i,level)=>{const n=i%12;if(n===0||n===11)return'challenge';if(n%4===0||(/^P[1-3]$/.test(level)&&n%3===0))return'easy';return'medium'};
+// Generates original questions from curriculum topics. External resources may
+// inform topic coverage and pedagogy, but protected question wording is never copied.
+const hash=s=>{let h=2166136261;for(const ch of String(s)){h^=ch.charCodeAt(0);h=Math.imul(h,16777619)}return h>>>0};
+const rand=(s,min,max)=>min+hash(s)%(max-min+1);
+const pick=(s,a)=>a[hash(s)%a.length];
+const shuffle=(a,s)=>{const x=[...a];for(let i=x.length-1;i>0;i--){const j=hash(`${s}:${i}`)%(i+1);[x[i],x[j]]=[x[j],x[i]]}return x};
+const levelBand=level=>/^P[1-3]$/.test(level)?'primaryLower':/^P[4-6]$/.test(level)?'primaryUpper':/^JSS/.test(level)?'jss':'sss';
+const difficultyFor=(i,level)=>{const band=levelBand(level),r=i%20;if(r===0||r===19)return'challenge';if(r>=14)return'hard';if(band==='primaryLower')return r%3===0?'easy':'medium';return r%5===0?'easy':'medium'};
 const familyFor=topic=>{const t=String(topic).toLowerCase();
  if(/set|venn/.test(t))return'sets';
  if(/fraction|decimal|percentage|sharing|ratio|proportion|rate|variation/.test(t))return'fraction';
  if(/statistics|data|probability|pictogram|chart|mean|median|mode|range/.test(t))return'stats';
  if(/trigonometric|trigonometry/.test(t))return'trig';
  if(/calculus|differentiation|integration/.test(t))return'calculus';
- if(/financial|money|transaction|profit|loss|discount|interest|applied/.test(t))return'financial';
+ if(/financial|money|profit|loss|discount|interest|applied/.test(t))return'financial';
  if(/coordinate|geometry|shape|angle|mensuration|perimeter|area|volume|symmetry|space|measurement|construction/.test(t))return'geometry';
  if(/matrix|matrices/.test(t))return'matrix';
  if(/permutation|combination/.test(t))return'counting';
  if(/vector/.test(t))return'vector';
  if(/sequence|series/.test(t))return'sequence';
- if(/logarithm|log\b|indices|index|surd|standard form/.test(t))return'indices';
+ if(/logarithm|\blog\b|indices|index|surd|standard form/.test(t))return'indices';
  if(/function/.test(t))return'function';
  if(/algebra|equation|expression|quadratic|factor|formula/.test(t))return'algebra';
  return'number';
 };
-function make(topic,level,index){
- const n=index+1,seed=`${level}-${topic}-${n}`,v=hash(seed)%12,difficulty=difficultyFor(index,level),f=familyFor(topic);
- if(f==='sets'){
-  const a=rand(`${seed}a`,3,12),b=rand(`${seed}b`,3,12),common=rand(`${seed}c`,0,Math.min(a,b)),correct=a+b-common;
-  return q(`${level}-gen-${n}`,topic,`Set A has ${a} elements and Set B has ${b} elements. If ${common} elements are common to both sets, how many elements are in A ∪ B?`,correct,`n(A∪B)=${a}+${b}−${common}=${correct}.`,difficulty,'Find the union of two sets');
- }
- if(f==='fraction'){
-  const d=v%3===0?10:v%3===1?100:rand(`${seed}d`,3,12),a=rand(`${seed}a`,1,d-1),b=rand(`${seed}b`,1,d-1),type=v%5;
-  if(type===0){const whole=rand(`${seed}w`,2,8),correct=whole*d+a;return q(`${level}-gen-${n}`,topic,`Write ${whole} ${a}/${d} as an improper fraction. Give the numerator.`,correct,`${whole}×${d}+${a}=${correct}.`,difficulty,'Convert a mixed number to an improper fraction')}
-  if(type===1){const correct=a+b;return q(`${level}-gen-${n}`,topic,`What is ${a}/${d} + ${b}/${d}? Give the numerator when the denominator is ${d}.`,correct,`Add the numerators: ${a}+${b}=${correct}.`,difficulty,'Add fractions with like denominators')}
-  if(type===2){const hi=Math.max(a,b),lo=Math.min(a,b),correct=hi-lo;return q(`${level}-gen-${n}`,topic,`What is ${hi}/${d} − ${lo}/${d}? Give the numerator when the denominator is ${d}.`,correct,`${hi}−${lo}=${correct}.`,difficulty,'Subtract fractions with like denominators')}
-  if(type===3){const whole=rand(`${seed}w`,20,120),num=rand(`${seed}n`,1,4),den=rand(`${seed}x`,5,10),correct=whole*num/den;return q(`${level}-gen-${n}`,topic,`Find ${num}/${den} of ${whole}.`,correct,`${whole}×${num}/${den}=${correct}.`,difficulty,'Find a fraction of a quantity')}
-  const correct=Number((a/d).toFixed(2));return q(`${level}-gen-${n}`,topic,`Write ${a}/${d} as a decimal, correct to 2 decimal places.`,correct,`${a}÷${d}=${correct}.`,difficulty,'Convert a fraction to a decimal',0.01);
- }
- if(f==='stats'){
-  const vals=Array.from({length:5},(_,i)=>rand(`${seed}v${i}`,2,40)),type=v%5;
-  if(type===0){const correct=Math.max(...vals);return q(`${level}-gen-${n}`,topic,`Which is the largest value in ${vals.join(', ')}?`,correct,`The largest value is ${correct}.`,difficulty,'Compare data values')}
-  if(type===1){const correct=Math.min(...vals);return q(`${level}-gen-${n}`,topic,`Which is the smallest value in ${vals.join(', ')}?`,correct,`The smallest value is ${correct}.`,difficulty,'Compare data values')}
-  if(type===2){const correct=vals.reduce((a,b)=>a+b,0);return q(`${level}-gen-${n}`,topic,`Find the total of ${vals.join(', ')}.`,correct,`${vals.join(' + ')}=${correct}.`,difficulty,'Calculate a total from data')}
-  if(type===3){const sum=vals.reduce((a,b)=>a+b,0),correct=sum/5;return q(`${level}-gen-${n}`,topic,`Five learners scored ${vals.join(', ')} marks. What is their mean score?`,correct,`${sum}÷5=${correct}.`,difficulty,'Calculate the mean of a data set',0.01)}
-  const sorted=[...vals].sort((a,b)=>a-b),correct=sorted[2];return q(`${level}-gen-${n}`,topic,`Find the median of ${vals.join(', ')}.`,correct,`Ordered values: ${sorted.join(', ')}. The middle value is ${correct}.`,difficulty,'Find the median of a data set');
- }
- if(f==='geometry'){
-  const a=rand(`${seed}a`,3,30),b=rand(`${seed}b`,3,30),type=v%6;
-  if(type===0){const correct=2*(a+b);return q(`${level}-gen-${n}`,topic,`A rectangle is ${a} cm long and ${b} cm wide. Find its perimeter.`,correct,`P=2(${a}+${b})=${correct} cm.`,difficulty,'Calculate rectangle perimeter')}
-  if(type===1){const correct=a*b;return q(`${level}-gen-${n}`,topic,`A rectangle is ${a} cm long and ${b} cm wide. Find its area.`,correct,`A=${a}×${b}=${correct} cm².`,difficulty,'Calculate rectangle area')}
-  if(type===2){const c=rand(`${seed}c`,2,15),correct=a*b*c;return q(`${level}-gen-${n}`,topic,`A cuboid measures ${a} cm by ${b} cm by ${c} cm. Find its volume.`,correct,`V=${a}×${b}×${c}=${correct} cm³.`,difficulty,'Calculate cuboid volume')}
-  if(type===3){const side=rand(`${seed}s`,3,30),correct=4*side;return q(`${level}-gen-${n}`,topic,`A square has side length ${side} cm. Find its perimeter.`,correct,`P=4×${side}=${correct} cm.`,difficulty,'Calculate square perimeter')}
-  if(type===4){const side=rand(`${seed}s`,3,30),correct=side*side;return q(`${level}-gen-${n}`,topic,`A square has side length ${side} cm. Find its area.`,correct,`A=${side}×${side}=${correct} cm².`,difficulty,'Calculate square area')}
-  const base=rand(`${seed}base`,4,30),h=rand(`${seed}h`,4,30),correct=base*h/2;return q(`${level}-gen-${n}`,topic,`A triangle has base ${base} cm and height ${h} cm. Find its area.`,correct,`A=½×${base}×${h}=${correct} cm².`,difficulty,'Calculate triangle area');
- }
- if(f==='algebra'){
-  const a=rand(`${seed}a`,2,12),x=rand(`${seed}x`,1,20),c=rand(`${seed}c`,1,30),rhs=a*x+c,type=v%4;
-  if(type===0){const b=rand(`${seed}b`,2,12),correct=a+b;return q(`${level}-gen-${n}`,topic,`Simplify ${a}x + ${b}x. What is the coefficient of x?`,correct,`${a}+${b}=${correct}.`,difficulty,'Collect like terms')}
-  if(type===1)return q(`${level}-gen-${n}`,topic,`Solve ${a}x + ${c} = ${rhs}.`,x,`Subtract ${c}, then divide by ${a}: x=${x}.`,difficulty,'Solve a linear equation')
-  if(type===2){const value=rand(`${seed}value`,1,15),correct=a*value+c;return q(`${level}-gen-${n}`,topic,`If x=${value}, find ${a}x+${c}.`,correct,`${a}×${value}+${c}=${correct}.`,difficulty,'Substitute values into an expression')}
-  const correct=a*x;return q(`${level}-gen-${n}`,topic,`If x=${x}, what is ${a}x?`,correct,`${a}×${x}=${correct}.`,difficulty,'Evaluate an algebraic expression');
- }
- if(f==='indices'){
-  const base=rand(`${seed}b`,2,6),m=rand(`${seed}m`,1,5),r=rand(`${seed}r`,1,4),type=v%3;
-  if(type===0){const correct=m+r;return q(`${level}-gen-${n}`,topic,`Simplify a^${m} × a^${r}. Give the exponent of a.`,correct,`Add exponents: ${m}+${r}=${correct}.`,difficulty,'Use the multiplication law of indices')}
-  if(type===1){const correct=m*r;return q(`${level}-gen-${n}`,topic,`Simplify (a^${m})^${r}. Give the exponent of a.`,correct,`Multiply exponents: ${m}×${r}=${correct}.`,difficulty,'Use the power law of indices')}
-  const correct=base**m;return q(`${level}-gen-${n}`,topic,`Evaluate ${base}^${m}.`,correct,`${base}^${m}=${correct}.`,difficulty,'Evaluate an index expression');
- }
- if(f==='sequence'){
-  const first=rand(`${seed}a`,1,20),step=rand(`${seed}s`,2,12),term=rand(`${seed}t`,3,10),correct=first+(term-1)*step;return q(`${level}-gen-${n}`,topic,`An arithmetic sequence starts ${first}, ${first+step}, ${first+2*step}, … What is the ${term}th term?`,correct,`Tₙ=a+(n−1)d=${first}+(${term}−1)×${step}=${correct}.`,difficulty,'Find a term of an arithmetic sequence');
- }
- if(f==='function'){
-  const a=rand(`${seed}a`,2,9),b=rand(`${seed}b`,1,12),x=rand(`${seed}x`,1,10),correct=a*x+b;return q(`${level}-gen-${n}`,topic,`If f(x)=${a}x+${b}, find f(${x}).`,correct,`f(${x})=${a}×${x}+${b}=${correct}.`,difficulty,'Evaluate a function');
- }
- if(f==='matrix'){
-  const a=rand(`${seed}a`,1,9),b=rand(`${seed}b`,1,9),c=rand(`${seed}c`,1,9),d=rand(`${seed}d`,1,9),correct=a*d-b*c;return q(`${level}-gen-${n}`,topic,`Find the determinant of [[${a}, ${b}], [${c}, ${d}]].`,correct,`Determinant=(${a}×${d})−(${b}×${c})=${correct}.`,difficulty,'Find the determinant of a 2 × 2 matrix');
- }
- if(f==='counting'){
-  const total=rand(`${seed}n`,5,9),r=rand(`${seed}r`,2,total-1),type=v%2;
-  let numerator=1,denominator=1;for(let i=0;i<r;i++){numerator*=total-i;denominator*=i+1}
-  if(type===0)return q(`${level}-gen-${n}`,topic,`How many ways can ${r} objects be chosen from ${total} when order does not matter?`,numerator/denominator,`Use nCr=${total}!/(${r}!(${total-r})!)=${numerator/denominator}.`,difficulty,'Apply combinations');
-  return q(`${level}-gen-${n}`,topic,`How many ordered arrangements of ${r} positions can be made from ${total} different objects?`,numerator,`Use nPr=${total}×${total-1}×… for ${r} factors=${numerator}.`,difficulty,'Apply permutations');
- }
- if(f==='vector'){
-  const a=rand(`${seed}a`,1,9),b=rand(`${seed}b`,1,9),c=rand(`${seed}c`,1,9),d=rand(`${seed}d`,1,9),correct=v%2?a*d-b*c:a+c;return q(`${level}-gen-${n}`,topic,v%2?`For u=(${a},${b}) and v=(${c},${d}), find ad−bc.`:`For u=(${a},${b}) and v=(${c},${d}), find the x-component of u+v.`,correct,v%2?`${a}×${d}−${b}×${c}=${correct}.`:`${a}+${c}=${correct}.`,difficulty,'Apply vector operations');
- }
- if(f==='trig'){
-  const k=rand(seed,2,30),type=v%3;
-  if(type===0)return q(`${level}-gen-${n}`,topic,`A right triangle has hypotenuse ${2*k} cm and angle 30°. Using sin 30°=1/2, find the opposite side.`,k,`Opposite=${2*k}×1/2=${k} cm.`,difficulty,'Apply sine in a right triangle')
-  if(type===1)return q(`${level}-gen-${n}`,topic,`A right triangle has hypotenuse ${2*k} cm and angle 60°. Using cos 60°=1/2, find the adjacent side.`,k,`Adjacent=${2*k}×1/2=${k} cm.`,difficulty,'Apply cosine in a right triangle')
-  return q(`${level}-gen-${n}`,topic,`A right triangle has an adjacent side of ${k} cm and angle 45°. Using tan 45°=1, find the opposite side.`,k,`Opposite=${k}×1=${k} cm.`,difficulty,'Apply tangent in a right triangle');
- }
- if(f==='calculus'){
-  const a=rand(seed,2,9),x=rand(`${seed}x`,1,9),b=rand(`${seed}b`,1,12),power=rand(`${seed}p`,2,4),type=v%3;
-  if(type===0)return q(`${level}-gen-${n}`,topic,`If f(x)=${a}x+${b}, what is f′(x)?`,a,`The derivative of ${a}x is ${a}; the constant becomes 0.`,difficulty,'Differentiate a linear function')
-  if(type===1){const correct=a*power;return q(`${level}-gen-${n}`,topic,`If y=${a}x^${power}, what is the coefficient in dy/dx?`,correct,`dy/dx=${a*power}x^${power-1}.`,difficulty,'Differentiate a power function')}
-  const correct=a*x;return q(`${level}-gen-${n}`,topic,`If f(x)=${a}x, what is f(${x})?`,correct,`${a}×${x}=${correct}.`,difficulty,'Evaluate a simple function');
- }
- if(f==='financial'){
-  const p=rand(seed,20,500)*100,rate=rand(`${seed}r`,2,15),time=rand(`${seed}t`,1,4),type=v%4,interest=p*rate*time/100;
-  if(type===0)return q(`${level}-gen-${n}`,topic,`Find the simple interest on ₦${p.toLocaleString()} at ${rate}% per year for ${time} year(s).`,interest,`SI=PRT/100=₦${interest.toLocaleString()}.`,difficulty,'Calculate simple interest')
-  if(type===1){const correct=p+interest;return q(`${level}-gen-${n}`,topic,`Find the amount on ₦${p.toLocaleString()} at ${rate}% simple interest for ${time} year(s).`,correct,`Amount=₦${p.toLocaleString()}+₦${interest.toLocaleString()}=₦${correct.toLocaleString()}.`,difficulty,'Calculate amount using simple interest')}
-  const discount=rand(`${seed}d`,5,20),correct=p*discount/100;return q(`${level}-gen-${n}`,topic,`A ₦${p.toLocaleString()} item is discounted by ${discount}%. Find the discount amount.`,correct,`Discount=₦${correct.toLocaleString()}.`,difficulty,'Calculate a percentage discount');
- }
- const a=rand(seed,1,/^P[1-3]$/.test(level)?99:/^P[4-6]$/.test(level)?999:9999),b=rand(`${seed}b`,1,100),op=v%6;
- if(op===0)return q(`${level}-gen-${n}`,topic,`What is ${a} + ${b}?`,a+b,`${a}+${b}=${a+b}.`,difficulty,'Add numbers');
- if(op===1){const x=Math.max(a,b),y=Math.min(a,b);return q(`${level}-gen-${n}`,topic,`What is ${x} − ${y}?`,x-y,`${x}−${y}=${x-y}.`,difficulty,'Subtract numbers')}
- if(op===2)return q(`${level}-gen-${n}`,topic,`What is ${a} × ${b}?`,a*b,`${a}×${b}=${a*b}.`,difficulty,'Multiply numbers');
- if(op===3){const divisor=Math.max(2,b),quot=rand(`${seed}q`,2,50);return q(`${level}-gen-${n}`,topic,`How many groups of ${divisor} are in ${divisor*quot}?`,quot,`${divisor*quot}÷${divisor}=${quot}.`,difficulty,'Divide numbers')}
- if(op===4){const correct=Math.round(a/10)*10;return q(`${level}-gen-${n}`,topic,`Round ${a} to the nearest ten.`,correct,`${a} rounds to ${correct}.`,difficulty,'Round whole numbers')}
- const correct=a%10;return q(`${level}-gen-${n}`,topic,`What is the remainder when ${a} is divided by 10?`,correct,`The last digit is ${correct}, so the remainder is ${correct}.`,difficulty,'Find a remainder');
-}
-export function generateCurriculumBank(level,topics,count=2000){const safe=Array.isArray(topics)&&topics.length?topics:['Number and Numeration'];const per=Math.ceil(count/safe.length),out=[];safe.forEach(topic=>{for(let i=0;i<per;i++)out.push(make(topic,level,i))});return shuffle(out,`${level}-bank`).slice(0,count)}
-export function generateExamBank(exam,count=2000){const topics=['Number and Numeration','Algebraic Processes','Geometry and Mensuration','Statistics and Probability','Trigonometry','Financial Mathematics','Problem Solving'];const out=[];for(let i=0;i<count;i++){const topic=topics[i%topics.length],item=make(`${exam} ${topic}`,exam,i);out.push({...item,id:`${exam.toLowerCase()}-style-${String(i+1).padStart(4,'0')}`,sourceType:`${exam}_STYLE_ORIGINAL`,exam})}return out}
+const context=['a school library','a class exercise','a market in Lagos','a shop in Abuja','a farm in Kaduna','a bus journey','a football practice','a school canteen','a family budget','a stationery shop','a water tank','a community project'];
+const q=(id,topic,text,correct,explanation,difficulty,objective,step=1,extra={})=>{const c=Number(correct);const ds=new Set([c]);let k=1;while(ds.size<4){const d=((hash(`${id}:d:${k}`)%9)+1)*step;const candidate=c+(k%2?d:-d);if(Number.isFinite(candidate))ds.add(Number.isInteger(candidate)?candidate:Number(candidate.toFixed(6)));k++}const os=shuffle([...ds],`${id}:o`);return{id,topic,q:text,options:os,answer:os.indexOf(c),explanation,difficulty,objective,sourceType:'CURRICULUM_ORIGINAL',...extra};};
+const numberQuestion=(topic,level,n,seed,difficulty)=>{const band=levelBand(level),type=hash(`${seed}:type`)%8;const hi=band==='primaryLower'?50:band==='primaryUpper'?500:band==='jss'?5000:100000;
+ if(type===0){const a=rand(`${seed}:a`,band==='primaryLower'?1:10,hi),b=rand(`${seed}:b`,1,hi);return q(`${level}-gen-${n}`,topic,`What is ${a}+${b}?`,a+b,`${a}+${b}=${a+b}.`,difficulty,'Add whole numbers');}
+ if(type===1){const a=rand(`${seed}:a`,1,hi),b=rand(`${seed}:b`,1,Math.max(1,a));return q(`${level}-gen-${n}`,topic,`Find ${a}−${b}.`,a-b,`${a}−${b}=${a-b}.`,difficulty,'Subtract whole numbers');}
+ if(type===2){const max=band==='primaryLower'?12:band==='primaryUpper'?25:50;const a=rand(`${seed}:a`,2,max),b=rand(`${seed}:b`,2,max);return q(`${level}-gen-${n}`,topic,`Calculate ${a}×${b}.`,a*b,`${a}×${b}=${a*b}.`,difficulty,'Multiply whole numbers');}
+ if(type===3){const b=rand(`${seed}:b`,2,25),a=rand(`${seed}:a`,2,25)*b;return q(`${level}-gen-${n}`,topic,`Calculate ${a}÷${b}.`,a/b,`${a}÷${b}=${a/b}.`,difficulty,'Divide whole numbers');}
+ if(type===4){const base=band==='primaryLower'?10:band==='primaryUpper'?100:1000,p=rand(`${seed}:p`,1,9),a=p*base+rand(`${seed}:r`,0,base-1);return q(`${level}-gen-${n}`,topic,`What is the value of the digit ${p} in ${a}?`,p*base,`The digit ${p} is in the ${base===10?'tens':base===100?'hundreds':'thousands'} place, so its value is ${p*base}.`,difficulty,'Identify place value');}
+ if(type===5){const a=rand(`${seed}:a`,1,99),b=rand(`${seed}:b`,1,99),sum=a+b;return q(`${level}-gen-${n}`,topic,`${pick(seed,context)} has ${a} items and receives ${b} more. How many items are there now?`,sum,`${a}+${b}=${sum}.`,difficulty,'Solve a simple addition word problem');}
+ if(type===6){const a=rand(`${seed}:a`,2,40),m=rand(`${seed}:m`,2,9),correct=a*m;return q(`${level}-gen-${n}`,topic,`${a} learners each receive ${m} exercise books. How many exercise books are needed?`,correct,`${a}×${m}=${correct}.`,difficulty,'Apply multiplication to a practical problem');}
+ const a=rand(`${seed}:a`,10,999),round=hash(seed)%2?10:100,correct=Math.round(a/round)*round;return q(`${level}-gen-${n}`,topic,`Round ${a} to the nearest ${round===10?'ten':'hundred'}.`,correct,`${a} rounded to the nearest ${round===10?'ten':'hundred'} is ${correct}.`,difficulty,'Round whole numbers');};
+const fractionQuestion=(topic,level,n,seed,difficulty)=>{const type=hash(`${seed}:type`)%8,d=pick(`${seed}:d`,[2,3,4,5,8,10,20,25,50,100]),a=rand(`${seed}:a`,1,d-1),b=rand(`${seed}:b`,1,d-1);
+ if(type===0){const correct=a+b;return q(`${level}-gen-${n}`,topic,`What is ${a}/${d}+${b}/${d}? Give the numerator when the denominator is ${d}.`,correct,`Add the numerators: ${a}+${b}=${correct}.`,difficulty,'Add fractions with like denominators');}
+ if(type===1){const hi=Math.max(a,b),lo=Math.min(a,b),correct=hi-lo;return q(`${level}-gen-${n}`,topic,`What is ${hi}/${d}−${lo}/${d}? Give the numerator when the denominator is ${d}.`,correct,`Subtract the numerators: ${hi}−${lo}=${correct}.`,difficulty,'Subtract fractions with like denominators');}
+ if(type===2){const whole=rand(`${seed}:w`,1,12),num=rand(`${seed}:n`,1,4),den=pick(`${seed}:x`,[2,3,4,5,10]),correct=whole*den+num;return q(`${level}-gen-${n}`,topic,`Convert ${whole} ${num}/${den} to an improper fraction. Give the numerator.`,correct,`${whole}×${den}+${num}=${correct}.`,difficulty,'Convert a mixed number to an improper fraction');}
+ if(type===3){const whole=rand(`${seed}:w`,12,200),num=rand(`${seed}:n`,1,4),den=pick(`${seed}:x`,[2,4,5,10]),correct=whole*num/den;return q(`${level}-gen-${n}`,topic,`Find ${num}/${den} of ${whole}.`,correct,`${whole}×${num}/${den}=${correct}.`,difficulty,'Find a fraction of a quantity');}
+ if(type===4){const pct=pick(`${seed}:p`,[5,10,20,25,50,75]),whole=rand(`${seed}:w`,20,400),correct=whole*pct/100;return q(`${level}-gen-${n}`,topic,`What is ${pct}% of ${whole}?`,correct,`${pct}/100×${whole}=${correct}.`,difficulty,'Find a percentage of a quantity');}
+ if(type===5){const num=rand(`${seed}:n`,1,9),den=pick(`${seed}:d2`,[2,4,5,10]),correct=Number((num/den).toFixed(2));return q(`${level}-gen-${n}`,topic,`Write ${num}/${den} as a decimal to 2 decimal places.`,correct,`${num}÷${den}=${correct}.`,difficulty,'Convert a fraction to a decimal',0.01);}
+ if(type===6){const unit=rand(`${seed}:u`,2,15),share=rand(`${seed}:s`,2,12),correct=unit*share;return q(`${level}-gen-${n}`,topic,`A class shares ${correct} exercise books equally among ${share} learners. How many does each learner receive?`,unit,`${correct}÷${share}=${unit}.`,difficulty,'Use division in a sharing problem');}
+ const r=rand(`${seed}:r`,2,9),base=rand(`${seed}:base`,2,8),correct=r*base;return q(`${level}-gen-${n}`,topic,`A recipe uses ${base} cups of flour for one batch. How many cups are needed for ${r} batches?`,correct,`${base}×${r}=${correct}.`,difficulty,'Apply ratio and multiplication');};
+const statsQuestion=(topic,level,n,seed,difficulty)=>{const type=hash(`${seed}:type`)%7,vals=Array.from({length:5},(_,i)=>rand(`${seed}:v${i}`,1,50));
+ if(type===0){const c=Math.max(...vals);return q(`${level}-gen-${n}`,topic,`Which value is the largest: ${vals.join(', ')}?`,c,`The largest value is ${c}.`,difficulty,'Identify the largest data value');}
+ if(type===1){const c=Math.min(...vals);return q(`${level}-gen-${n}`,topic,`Which value is the smallest: ${vals.join(', ')}?`,c,`The smallest value is ${c}.`,difficulty,'Identify the smallest data value');}
+ if(type===2){const c=vals.reduce((a,b)=>a+b,0);return q(`${level}-gen-${n}`,topic,`Find the total of ${vals.join(', ')}.`,c,`${vals.join('+')}=${c}.`,difficulty,'Find the total of a data set');}
+ if(type===3){const s=vals.reduce((a,b)=>a+b,0),c=Number((s/5).toFixed(2));return q(`${level}-gen-${n}`,topic,`Five learners scored ${vals.join(', ')} marks. Find the mean score.`,c,`${s}÷5=${c}.`,difficulty,'Calculate the mean');}
+ if(type===4){const s=[...vals].sort((a,b)=>a-b),c=s[2];return q(`${level}-gen-${n}`,topic,`Find the median of ${vals.join(', ')}.`,c,`Ordered data: ${s.join(', ')}. The middle value is ${c}.`,difficulty,'Calculate the median');}
+ if(type===5){const s=[...vals].sort((a,b)=>a-b),c=s[4]-s[0];return q(`${level}-gen-${n}`,topic,`Find the range of ${vals.join(', ')}.`,c,`${s[4]}−${s[0]}=${c}.`,difficulty,'Calculate the range');}
+ const sections=rand(`${seed}:s`,1,4),c=Number((sections/4).toFixed(2));return q(`${level}-gen-${n}`,topic,`A fair spinner has 4 equal sections. If ${sections} sections show the same colour, what is the probability of landing on that colour? Give a decimal.`,c,`${sections}/4=${c}.`,difficulty,'Find a simple probability',0.01);};
+const geometryQuestion=(topic,level,n,seed,difficulty)=>{const type=hash(`${seed}:type`)%8,a=rand(`${seed}:a`,3,30),b=rand(`${seed}:b`,2,25);
+ if(type===0){const c=2*(a+b);return q(`${level}-gen-${n}`,topic,`A rectangle is ${a} cm long and ${b} cm wide. Find its perimeter.`,c,`2(${a}+${b})=${c} cm.`,difficulty,'Find the perimeter of a rectangle');}
+ if(type===1){const c=a*b;return q(`${level}-gen-${n}`,topic,`A rectangle is ${a} cm long and ${b} cm wide. Find its area.`,c,`${a}×${b}=${c} cm².`,difficulty,'Find the area of a rectangle');}
+ if(type===2){const c=4*a;return q(`${level}-gen-${n}`,topic,`A square has side ${a} cm. Find its perimeter.`,c,`4×${a}=${c} cm.`,difficulty,'Find the perimeter of a square');}
+ if(type===3){const c=a*a;return q(`${level}-gen-${n}`,topic,`A square has side ${a} cm. Find its area.`,c,`${a}×${a}=${c} cm².`,difficulty,'Find the area of a square');}
+ if(type===4){const h=rand(`${seed}:h`,3,20),c=a*h/2;return q(`${level}-gen-${n}`,topic,`A triangle has base ${a} cm and height ${h} cm. Find its area.`,c,`1/2×${a}×${h}=${c} cm².`,difficulty,'Find the area of a triangle');}
+ if(type===5){const d=rand(`${seed}:d`,2,12),c=a*b*d;return q(`${level}-gen-${n}`,topic,`A cuboid has dimensions ${a} cm, ${b} cm and ${d} cm. Find its volume.`,c,`${a}×${b}×${d}=${c} cm³.`,difficulty,'Find the volume of a cuboid');}
+ if(type===6){const angle=pick(`${seed}:ang`,[30,45,60,90,120,180]);return q(`${level}-gen-${n}`,topic,`What is the measure of an angle of ${angle}°?`,angle,`The stated angle measures ${angle}°.`,difficulty,'Recognise angle measures');}
+ const x=rand(`${seed}:x`,-10,10),y=rand(`${seed}:y`,-10,10);return q(`${level}-gen-${n}`,topic,`What is the x-coordinate of the point (${x}, ${y})?`,x,`The first coordinate is the x-coordinate, so it is ${x}.`,difficulty,'Identify the x-coordinate');};
+const algebraQuestion=(topic,level,n,seed,difficulty)=>{const type=hash(`${seed}:type`)%7,a=rand(`${seed}:a`,2,12),b=rand(`${seed}:b`,1,20),x=rand(`${seed}:x`,1,15);
+ if(type===0){const c=a+b;return q(`${level}-gen-${n}`,topic,`Simplify ${a}x+${b}x. What is the coefficient of x?`,c,`${a}+${b}=${c}.`,difficulty,'Collect like terms');}
+ if(type===1){const c=a*x+b;return q(`${level}-gen-${n}`,topic,`Solve ${a}x+${b}=${c}.`,x,`Subtract ${b}, then divide by ${a}: x=${x}.`,difficulty,'Solve a linear equation');}
+ if(type===2){const c=a*x+b;return q(`${level}-gen-${n}`,topic,`If x=${x}, find ${a}x+${b}.`,c,`${a}×${x}+${b}=${c}.`,difficulty,'Substitute into an expression');}
+ if(type===3){const c=a*x;return q(`${level}-gen-${n}`,topic,`If x=${x}, find ${a}x.`,c,`${a}×${x}=${c}.`,difficulty,'Evaluate an algebraic term');}
+ if(type===4){const c=a*b;return q(`${level}-gen-${n}`,topic,`Expand ${a}(x+${b}). What is the coefficient of x?`,a,`${a}(x+${b})=${a}x+${c}; the coefficient of x is ${a}.`,difficulty,'Expand a simple algebraic expression');}
+ if(type===5){const c=(x+a)*(x+b);return q(`${level}-gen-${n}`,topic,`If x=${x}, find (x+${a})(x+${b}).`,c,`(${x}+${a})(${x}+${b})=${c}.`,difficulty,'Evaluate a product of algebraic factors');}
+ const c=a*a;return q(`${level}-gen-${n}`,topic,`What is ${a}²?`,c,`${a}×${a}=${c}.`,difficulty,'Evaluate a square');};
+const indicesQuestion=(topic,level,n,seed,difficulty)=>{const type=hash(`${seed}:type`)%6,a=rand(`${seed}:a`,2,8),m=rand(`${seed}:m`,1,5),r=rand(`${seed}:r`,1,4);
+ if(type===0){const c=m+r;return q(`${level}-gen-${n}`,topic,`Simplify a^${m}×a^${r}. Give the exponent of a.`,c,`Add exponents: ${m}+${r}=${c}.`,difficulty,'Apply the product law of indices');}
+ if(type===1){const c=m*r;return q(`${level}-gen-${n}`,topic,`Simplify (a^${m})^${r}. Give the exponent of a.`,c,`Multiply exponents: ${m}×${r}=${c}.`,difficulty,'Apply the power law of indices');}
+ if(type===2){const c=a**m;return q(`${level}-gen-${n}`,topic,`Evaluate ${a}^${m}.`,c,`${a}^${m}=${c}.`,difficulty,'Evaluate a power');}
+ if(type===3){const c=Number((1/(a**m)).toFixed(6));return q(`${level}-gen-${n}`,topic,`Evaluate ${a}^−${m}. Give a decimal rounded to 6 decimal places.`,c,`${a}^−${m}=1/${a}^${m}=${c}.`,difficulty,'Evaluate a negative index',0.000001);}
+ if(type===4){const c=m-r;return q(`${level}-gen-${n}`,topic,`Simplify a^${m}÷a^${r}. Give the exponent of a.`,c,`Subtract exponents: ${m}−${r}=${c}.`,difficulty,'Apply the quotient law of indices');}
+ const c=a*10**m;return q(`${level}-gen-${n}`,topic,`Write ${c} as a×10^n. What is n?`,m,`${a}×10^${m}=${c}.`,difficulty,'Express a number in standard form');};
+const sequenceQuestion=(topic,level,n,seed,difficulty)=>{const first=rand(`${seed}:a`,1,30),step=rand(`${seed}:d`,1,15),term=rand(`${seed}:n`,3,15),type=hash(`${seed}:type`)%4;
+ if(type===0){const c=first+(term-1)*step;return q(`${level}-gen-${n}`,topic,`The sequence starts ${first}, ${first+step}, ${first+2*step}, … What is the ${term}th term?`,c,`a+(n−1)d=${first}+(${term}−1)×${step}=${c}.`,difficulty,'Find a term of an arithmetic sequence');}
+ if(type===1)return q(`${level}-gen-${n}`,topic,`The sequence ${first}, ${first+step}, ${first+2*step}, … has what common difference?`,step,`Subtract consecutive terms: the common difference is ${step}.`,difficulty,'Find the common difference');
+ if(type===2){const c=first+(term-1)*step;return q(`${level}-gen-${n}`,topic,`An arithmetic sequence has first term ${first} and common difference ${step}. Find its ${term}th term.`,c,`Tₙ=a+(n−1)d=${c}.`,difficulty,'Use the nth-term formula');}
+ const c=term*(2*first+(term-1)*step)/2;return q(`${level}-gen-${n}`,topic,`Find the sum of the first ${term} terms of an arithmetic sequence with first term ${first} and difference ${step}.`,c,`Sₙ=n/2[2a+(n−1)d]=${c}.`,difficulty,'Find the sum of an arithmetic sequence');};
+const trigQuestion=(topic,level,n,seed,difficulty)=>{const type=hash(`${seed}:type`)%5,k=rand(`${seed}:k`,2,30);
+ if(type===0)return q(`${level}-gen-${n}`,topic,`A right triangle has hypotenuse ${2*k} cm and angle 30°. Using sin 30°=1/2, find the opposite side.`,k,`Opposite=${2*k}×1/2=${k} cm.`,difficulty,'Use sine in a right triangle');
+ if(type===1)return q(`${level}-gen-${n}`,topic,`A right triangle has hypotenuse ${2*k} cm and angle 60°. Using cos 60°=1/2, find the adjacent side.`,k,`Adjacent=${2*k}×1/2=${k} cm.`,difficulty,'Use cosine in a right triangle');
+ if(type===2)return q(`${level}-gen-${n}`,topic,`A right triangle has adjacent side ${k} cm and angle 45°. Using tan 45°=1, find the opposite side.`,k,`Opposite=${k}×1=${k} cm.`,difficulty,'Use tangent in a right triangle');
+ if(type===3){const opp=rand(`${seed}:o`,3,25),adj=rand(`${seed}:a`,3,25),c=Number((opp/adj).toFixed(3));return q(`${level}-gen-${n}`,topic,`A right triangle has opposite ${opp} cm and adjacent ${adj} cm. Find tan θ to 3 decimal places.`,c,`tan θ=${opp}/${adj}=${c}.`,difficulty,'Calculate a trigonometric ratio',0.001);}
+ const c=pick(seed,[0,30,45,60,90]);return q(`${level}-gen-${n}`,topic,`An angle has a measure of ${c}°. What is its measure in degrees?`,c,`The angle is ${c}°.`,difficulty,'Recognise common angle measures');};
+const calculusQuestion=(topic,level,n,seed,difficulty)=>{const type=hash(`${seed}:type`)%5,a=rand(`${seed}:a`,2,9),b=rand(`${seed}:b`,1,12),p=rand(`${seed}:p`,2,5),x=rand(`${seed}:x`,1,8);
+ if(type===0)return q(`${level}-gen-${n}`,topic,`If f(x)=${a}x+${b}, what is f′(x)?`,a,`The derivative of ${a}x is ${a}; the constant differentiates to zero.`,difficulty,'Differentiate a linear function');
+ if(type===1){const c=a*p;return q(`${level}-gen-${n}`,topic,`What is the derivative of ${a}x^${p}? Give the coefficient of x^${p-1}.`,c,`d/dx[${a}x^${p}]=${a}×${p}x^${p-1}; the coefficient is ${c}.`,difficulty,'Apply the power rule');}
+ if(type===2){const c=a*x**p;return q(`${level}-gen-${n}`,topic,`Find the value of ${a}x^${p} at x=${x}.`,c,`${a}×${x}^${p}=${c}.`,difficulty,'Evaluate a polynomial term');}
+ if(type===3){const c=a/2;return q(`${level}-gen-${n}`,topic,`Find ∫(${a}x+${b})dx and give the coefficient of x².`,c,`∫${a}x dx=(${a}/2)x², so the coefficient is ${c}.`,difficulty,'Integrate a linear expression',0.01);}
+ const c=a*x+b;return q(`${level}-gen-${n}`,topic,`If f(x)=${a}x+${b}, find f(${x}).`,c,`${a}×${x}+${b}=${c}.`,difficulty,'Evaluate a function before differentiation');};
+const financialQuestion=(topic,level,n,seed,difficulty)=>{const type=hash(`${seed}:type`)%6,p=rand(`${seed}:p`,5,50),amount=rand(`${seed}:a`,1000,200000),years=rand(`${seed}:y`,1,5);
+ if(type===0){const c=amount*p*years/100;return q(`${level}-gen-${n}`,topic,`Find the simple interest on ₦${amount} at ${p}% per year for ${years} year${years>1?'s':''}.`,c,`SI=PRT/100=${amount}×${p}×${years}/100=₦${c}.`,difficulty,'Calculate simple interest');}
+ if(type===1){const c=amount+amount*p*years/100;return q(`${level}-gen-${n}`,topic,`An investment of ₦${amount} earns ${p}% simple interest for ${years} year${years>1?'s':''}. Find the amount at the end.`,c,`Interest plus principal gives ₦${c}.`,difficulty,'Calculate amount under simple interest');}
+ if(type===2){const pct=pick(`${seed}:pct`,[5,10,15,20,25,30]),c=amount*pct/100;return q(`${level}-gen-${n}`,topic,`A shop gives a ${pct}% discount on an item priced at ₦${amount}. Find the discount.`,c,`${pct}/100×₦${amount}=₦${c}.`,difficulty,'Calculate a discount');}
+ if(type===3){const pct=pick(`${seed}:pct`,[5,10,15,20,25]),c=amount*(1+pct/100);return q(`${level}-gen-${n}`,topic,`An item costs ₦${amount} before a ${pct}% increase. What is the new price?`,c,`₦${amount}×(1+${pct}/100)=₦${c}.`,difficulty,'Calculate percentage increase');}
+ if(type===4){const profit=amount*p/100,c=amount+profit;return q(`${level}-gen-${n}`,topic,`An item costs ₦${amount} and is sold at a ${p}% profit. Find the selling price.`,c,`Profit=₦${profit}; selling price=₦${c}.`,difficulty,'Calculate selling price from profit');}
+ const vat=7.5,c=Number((amount*vat/100).toFixed(2));return q(`${level}-gen-${n}`,topic,`For a practice exercise, calculate 7.5% VAT on ₦${amount}.`,c,`7.5/100×₦${amount}=₦${c}.`,difficulty,'Calculate VAT on a price');};
+const setsQuestion=(topic,level,n,seed,difficulty)=>{const a=rand(`${seed}:a`,3,20),b=rand(`${seed}:b`,3,20),common=rand(`${seed}:c`,0,Math.min(a,b)),c=a+b-common;return q(`${level}-gen-${n}`,topic,`Set A has ${a} elements and set B has ${b} elements. If ${common} are common to both, how many are in A∪B?`,c,`${a}+${b}−${common}=${c}.`,difficulty,'Find the number of elements in a union');};
+const matrixQuestion=(topic,level,n,seed,difficulty)=>{const a=rand(`${seed}:a`,1,9),b=rand(`${seed}:b`,1,9),c=rand(`${seed}:c`,1,9),d=rand(`${seed}:d`,1,9),det=a*d-b*c;return q(`${level}-gen-${n}`,topic,`Find the determinant of [[${a}, ${b}], [${c}, ${d}]].`,det,`Determinant=(${a}×${d})−(${b}×${c})=${det}.`,difficulty,'Find the determinant of a 2×2 matrix');};
+const countingQuestion=(topic,level,n,seed,difficulty)=>{const total=rand(`${seed}:n`,5,10),r=rand(`${seed}:r`,2,total-1),type=hash(`${seed}:type`)%2;let perm=1;for(let i=0;i<r;i++)perm*=total-i;let comb=1;for(let i=1;i<=r;i++)comb=comb*(total-r+i)/i;const c=type?perm:comb;return q(`${level}-gen-${n}`,topic,type?`How many ordered arrangements can be made by choosing ${r} objects from ${total} different objects?`:`How many groups of ${r} can be chosen from ${total} objects when order does not matter?`,c,type?`Use nPr=${total}×…=${c}.`:`Use nCr=${total}!/(${r}!(${total-r})!)=${c}.`,difficulty,type?'Apply permutations':'Apply combinations');};
+const vectorQuestion=(topic,level,n,seed,difficulty)=>{const a=rand(`${seed}:a`,1,9),b=rand(`${seed}:b`,1,9),c=rand(`${seed}:c`,1,9),d=rand(`${seed}:d`,1,9),ans=hash(`${seed}:type`)%2?a+c:a*d-b*c;return q(`${level}-gen-${n}`,topic,ans===a+c?`For u=(${a},${b}) and v=(${c},${d}), find the x-component of u+v.`:`For u=(${a},${b}) and v=(${c},${d}), find ad−bc.`,ans,ans===a+c?`${a}+${c}=${ans}.`:`${a}×${d}−${b}×${c}=${ans}.`,difficulty,'Apply vector operations');};
+function make(topic,level,index){const n=index+1,seed=`${level}|${topic}|${n}`,difficulty=difficultyFor(index,level),family=familyFor(topic);switch(family){case'fraction':return fractionQuestion(topic,level,n,seed,difficulty);case'stats':return statsQuestion(topic,level,n,seed,difficulty);case'geometry':return geometryQuestion(topic,level,n,seed,difficulty);case'algebra':return algebraQuestion(topic,level,n,seed,difficulty);case'indices':return indicesQuestion(topic,level,n,seed,difficulty);case'sequence':return sequenceQuestion(topic,level,n,seed,difficulty);case'trig':return trigQuestion(topic,level,n,seed,difficulty);case'calculus':return calculusQuestion(topic,level,n,seed,difficulty);case'financial':return financialQuestion(topic,level,n,seed,difficulty);case'sets':return setsQuestion(topic,level,n,seed,difficulty);case'matrix':return matrixQuestion(topic,level,n,seed,difficulty);case'counting':return countingQuestion(topic,level,n,seed,difficulty);case'vector':return vectorQuestion(topic,level,n,seed,difficulty);default:return numberQuestion(topic,level,n,seed,difficulty)}}
+export function generateCurriculumBank(level,topics,count=2000){const safe=Array.isArray(topics)&&topics.length?topics:['General Mathematics'];const out=[];for(let i=0;i<count;i++)out.push(make(safe[i%safe.length],level,i));return out;}
+export function generateExamBank(exam,count=2000){const topics=['Number and Numeration','Algebra and Equations','Fractions, Percentages and Ratio','Geometry and Mensuration','Statistics and Probability','Trigonometry','Financial Mathematics','Sequences and Functions','Problem Solving'];const out=[];for(let i=0;i<count;i++){const level=exam==='JAMB'?'SSS3':'SSS2';const item=make(topics[i%topics.length],level,i);out.push({...item,id:`${exam}-gen-${i+1}`,exam,sourceType:`${exam}_STYLE_ORIGINAL`,topic:`${exam} • ${item.topic}`,objective:`${exam}-style: ${item.objective}`});}return out;}
