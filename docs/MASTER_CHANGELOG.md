@@ -46,7 +46,17 @@ This is the running record of major MathBridge product, architecture, security, 
 - Added security-definer `start_school_test` and `submit_school_test` RPCs so test start state and objective marking are performed server-side.
 - Replaced broad student write access to test assignments/attempts with student read-only access; school staff retain administrative management access.
 - Added student policies for reading only published tests they are assigned to and their question snapshots.
-- The secure-test migration is repository-ready but must be executed and verified in the live Supabase project before the Test Centre can be considered production-complete.
+- The secure-test migration has now been executed in the live MathBridge Supabase project and verified by schema inspection.
+
+## 2026-09-15 — Live Supabase security hardening
+
+- Added explicit RLS policies for parent/teacher relationships and school operational tables.
+- Removed anonymous execute access from privileged school, platform-owner, and question-history RPCs.
+- Verified through PostgreSQL privilege inspection that the protected RPCs are not executable by `anon` and are available only to authenticated application flows.
+- Added a database trigger preventing ordinary authenticated users from changing their own platform role, closing the self-promotion path to `site_manager`.
+- Added protected school audit-log access for authorized school administrators.
+- Supabase Security Advisor no longer reports the previous RLS-enabled/no-policy findings.
+- Remaining Security Advisor warnings are intentional signed-in access to SECURITY DEFINER RPCs plus the separate Auth leaked-password-protection setting.
 
 ## 2026-09-15 — CI failure diagnosis and repair
 
