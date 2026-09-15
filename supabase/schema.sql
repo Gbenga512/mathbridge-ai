@@ -1,9 +1,9 @@
 -- MathBridge production database schema.
--- Run in Supabase SQL Editor after creating the project.
+-- Student learning records are independent of school subscription/enrollment.
 create extension if not exists pgcrypto;
 create table if not exists public.profiles (
  id uuid primary key references auth.users(id) on delete cascade,
- role text not null check (role in ('student','parent','teacher')),
+ role text not null check (role in ('student','parent','teacher','school_admin')),
  full_name text not null,
  class_level text,
  created_at timestamptz not null default now()
@@ -24,6 +24,44 @@ create table if not exists public.class_students (
  class_id uuid not null references public.teacher_classes(id) on delete cascade,
  student_id uuid not null references public.profiles(id) on delete cascade,
  primary key(class_id,student_id)
+);
+create table if not exists public.schools (
+ id uuid primary key default gen_random_uuid(),
+ name text not null,
+ school_code text not null unique,
+ created_at timestamptz not null default now()
+);
+create table if not exists public.school_staff (
+ school_id uuid not null references public.schools(id) on delete cascade,
+ user_id uuid not null references public.profiles(id) on delete cascade,
+ role text not null check (role in ('school_admin','teacher')),
+ created_at timestamptz not null default now(),
+ primary key(school_id,user_id)
+);
+create table if not exists public.school_classes (
+ id uuid primary key default gen_random_uuid(),
+ school_id uuid not null references public.schools(id) on delete cascade,
+ class_name text not null,
+ created_at timestamptz not null default now()
+);
+create table if not exists public.school_enrollments (
+ id uuid primary key default gen_random_uuid(),
+ school_id uuid not null references public.schools(id) on delete cascade,
+ student_id uuid not null references public.profiles(id) on delete cascade,
+ class_id uuid references public.school_classes(id) on delete set null,
+ status text not null default 'active' check (status in ('active','removed','suspended')),
+ sponsored_until timestamptz,
+ enrolled_at timestamptz not null default now(),
+ ended_at timestamptz,
+ unique(school_id,student_id)
+);
+create table if not exists public.school_subscriptions (
+ id uuid primary key default gen_random_uuid(),
+ school_id uuid not null references public.schools(id) on delete cascade,
+ seat_limit integer not null check (seat_limit > 0),
+ status text not null default 'active' check (status in ('active','past_due','cancelled','expired')),
+ starts_at timestamptz not null default now(),
+ ends_at timestamptz
 );
 create table if not exists public.progress (
  student_id uuid primary key references public.profiles(id) on delete cascade,
@@ -53,9 +91,10 @@ create table if not exists public.term_reports (
  created_at timestamptz not null default now()
 );
 
--- Create the learner profile and initial progress automatically when a Supabase
--- Auth user is created. This avoids relying on an active client session during
--- email-confirmation signup.
+-- Student learning data is deliberately separate from school enrollment.
+-- Removing a student from a school changes only school_enrollments.status/ended_at.
+-- Do not delete or reset progress, assessments, reports, or the auth/profile record.
+
 create or replace function public.handle_new_user()
 returns trigger
 language plpgsql
@@ -74,19 +113,21 @@ begin
 end;
 $$;
 drop trigger if exists on_auth_user_created on auth.users;
-create trigger on_auth_user_created
-after insert on auth.users
-for each row execute procedure public.handle_new_user();
+create trigger on_auth_user_created after insert on auth.users for each row execute procedure public.handle_new_user();
 
 alter table public.profiles enable row level security;
 alter table public.parent_children enable row level security;
 alter table public.teacher_classes enable row level security;
 alter table public.class_students enable row level security;
+alter table public.schools enable row level security;
+alter table public.school_staff enable row level security;
+alter table public.school_classes enable row level security;
+alter table public.school_enrollments enable row level security;
+alter table public.school_subscriptions enable row level security;
 alter table public.progress enable row level security;
 alter table public.assessments enable row level security;
 alter table public.term_reports enable row level security;
 
--- Base policies. Production deployment should review these with the final role model.
 create policy "profiles own record" on public.profiles for all using (auth.uid()=id) with check (auth.uid()=id);
 create policy "progress own record" on public.progress for all using (auth.uid()=student_id) with check (auth.uid()=student_id);
 create policy "assessments own record" on public.assessments for all using (auth.uid()=student_id) with check (auth.uid()=student_id);
