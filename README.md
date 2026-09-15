@@ -1,29 +1,40 @@
 # MathBridge AI
 
-MathBridge is a mathematics learning platform designed to help learners overcome fear of Mathematics, diagnose foundation gaps, learn simplified methods, practise, take timed challenges and earn rewards.
+MathBridge is a production mathematics learning platform designed to help learners overcome fear of Mathematics, diagnose foundation gaps, learn simplified methods, practise, take timed challenges, build mastery, and track progress.
 
-## MVP
-- Mathematics Health Check
-- Foundation/topic diagnosis
-- Personalized learning path
-- Simplified explanations
-- Formula memory song
-- Practice/challenge flow
-- Scores and badges
-- Mobile-first interface
+## Product scope
 
-## Local development
+- Curriculum-aligned mathematics learning
+- Diagnostic assessment
+- Personalized learning paths
+- Adaptive practice and mastery
+- Persistent student progress
+- School accounts, classes and enrollment
+- School Test Centre
+- Parent and teacher learning visibility
+- WAEC/NECO/JAMB preparation
+- Platform Owner / Site Manager administration
+- Cloud authentication and persistence
+- Mobile-responsive web experience
+- Android / Google Play Store distribution roadmap
+
+## Development
 
 ```bash
 npm install
 npm run dev
 ```
 
-## Product roadmap
-1. Student MVP
-2. Parent dashboard and reports
-3. Teacher/class monitoring
-4. Curriculum engine for Nigerian primary/JSS/SSS
-5. WAEC/NECO/JAMB preparation
-6. Authentication, payments and premium plans
-7. AI-powered adaptive tutoring
+## Production architecture
+
+MathBridge uses React/Vite for the web client, Supabase for authentication and cloud data, GitHub for source control/documentation, and Vercel for web deployment.
+
+See the `docs/` directory for the living product and technical manuals.
+
+## Documentation
+
+- `docs/PRODUCT_MANUAL.md` — product, business and operating principles
+- `docs/TECHNICAL_MANUAL.md` — architecture and engineering reference
+- `docs/MASTER_CHANGELOG.md` — running record of major changes and decisions
+
+MathBridge is the actual product under active development, not a prototype.
