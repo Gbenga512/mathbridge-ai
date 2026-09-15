@@ -1,4 +1,4 @@
-name: Lock MathBridge Question Banks
+name: MathBridge Question Bank QA
 on:
   push:
     branches: [main]
@@ -7,6 +7,15 @@ on:
       - 'src/data/questionFactory.js'
       - 'src/data/*.js'
       - 'scripts/verify-question-banks.mjs'
+      - 'scripts/verify-question-quality.mjs'
+      - 'package.json'
+      - '.github/workflows/lock-question-banks.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/data/**'
+      - 'scripts/verify-question-banks.mjs'
+      - 'scripts/verify-question-quality.mjs'
       - 'package.json'
       - '.github/workflows/lock-question-banks.yml'
   workflow_dispatch:
@@ -19,7 +28,9 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
-      - run: npm install
+          node-version: 22
+          cache: npm
+      - run: npm install --no-audit --no-fund
       - run: npm run verify:question-banks
+      - run: npm run verify:question-quality
       - run: npm run build
