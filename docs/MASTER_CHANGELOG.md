@@ -73,3 +73,32 @@ This is the running record of major MathBridge product, architecture, security, 
 - Established living Product, Technical, Deployment, and Master Changelog documentation.
 - MathBridge is the actual production product under active development, not a prototype.
 - Long-term Android distribution through Google Play Store remains the target.
+
+
+## 2026-09-18 — Week-by-week term progression and final-exam gate
+
+- Added termExamResults to persistent student progress.
+- A new student starts at First Term (T1) Week 1.
+- Students now complete instructional weeks sequentially; passing a weekly assessment at 80% or above unlocks the next week.
+- Completing the final instructional week no longer advances the student automatically into the next term.
+- A dedicated Term Final Exam is unlocked only after all instructional weeks in the current term are completed.
+- Passing the Term Final Exam at 80% or above advances the student to the next term at Week 1.
+- A failed final exam keeps the student in the current term and allows a fresh attempt.
+- The progression state is persisted in Supabase and local fallback storage.
+- Added src/WeeklyAssessment.jsx for fresh weekly tests and term final exams.
+
+## 2026-09-18 — Question-repeat reduction by curriculum stage
+
+- Added a dedicated weekly question-history activity type.
+- Weekly assessments select questions from the current week's curriculum topics instead of drawing blindly from the entire class bank.
+- Previously exposed weekly questions are excluded using persistent per-student history.
+- Term final exams select across the current term's curriculum topics and use a separate persistent exam history bucket.
+- The existing production bank remains at the 2,000-question-per-class baseline, with generated variation and unseen-question selection providing substantially more session variety.
+- This addresses the observed problem where students were repeatedly seeing the same questions within the same term.
+
+## 2026-09-18 — Production deployment verification
+
+- Fixed a duplicate curriculumCompleted export introduced during progression-gate implementation.
+- Vercel production deployment dpl_Hzmy5jDx7tXKbKXNQSHasNcGhpfL is READY.
+- Production deployment commit: 5c52ca488f43a6e36bb10bbc9369c5a171aa5cc5.
+- Supabase migrations for term-exam progress and weekly question history are applied to the live project.
