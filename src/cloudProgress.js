@@ -37,13 +37,13 @@ export async function setStudentClass(userId,classLevel){
 export async function getProgress(userId='local-user'){
  if(supabaseConfigured&&userId&&userId!=='local-user'){
   const {data,error}=await supabase.from('progress').select('*').eq('student_id',userId).maybeSingle();
-  if(!error&&data)return {term:data.term,week:data.week,masteredWeeks:data.mastered_weeks||[],updatedAt:data.updated_at};
+  if(!error&&data)return {term:data.term,week:data.week,masteredWeeks:data.mastered_weeks||[],termExamResults:data.term_exam_results||{},updatedAt:data.updated_at};
  }
  return localGet(userId);
 }
 export async function saveCloudProgress(userId,progress){
  if(supabaseConfigured&&userId&&userId!=='local-user'){
-  const {error}=await supabase.from('progress').upsert({student_id:userId,term:progress.term,week:progress.week,mastered_weeks:progress.masteredWeeks||[],updated_at:new Date().toISOString()});
+  const {error}=await supabase.from('progress').upsert({student_id:userId,term:progress.term,week:progress.week,mastered_weeks:progress.masteredWeeks||[],term_exam_results:progress.termExamResults||{},updated_at:new Date().toISOString()});
   if(!error)return {ok:true,mode:'supabase'};
  }
  return localSave(userId,progress);
