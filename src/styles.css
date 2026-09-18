@@ -23,3 +23,6 @@ header{padding-left:clamp(20px,4vw,64px);padding-right:clamp(20px,4vw,64px)}
 
 /* Performance Centre typography isolation: prevent generic dashboard card-grid rules from affecting exam sections. */
 .exam-dashboard .report h3{line-height:1.3;margin-top:0;margin-bottom:10px}.exam-dashboard .report p{line-height:1.7;margin-top:0}.exam-dashboard .topic-bars{margin-top:16px}.exam-dashboard .topic-bar h3{margin-top:0}.exam-dashboard .report>h3+h3{margin-top:24px}
+
+
+.term-exam-card{width:100%;margin-top:14px;padding:18px 20px;border:2px solid #e2e8f0;border-radius:16px;background:#fff;text-align:left;font-size:16px;font-weight:900;color:#334155;cursor:pointer}.term-exam-card:disabled{cursor:not-allowed;opacity:.65}.term-exam-card:not(:disabled){border-color:#f0c96b;background:#fffaf0;color:#8a5a00}.term-exam-card small{display:block;margin-top:5px;color:#64748b;font-size:12px;font-weight:600}.term-exam-card:not(:disabled) small{color:#9a6500}
