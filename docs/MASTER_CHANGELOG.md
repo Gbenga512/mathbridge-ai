@@ -102,3 +102,10 @@ This is the running record of major MathBridge product, architecture, security, 
 - Vercel production deployment dpl_Hzmy5jDx7tXKbKXNQSHasNcGhpfL is READY.
 - Production deployment commit: 5c52ca488f43a6e36bb10bbc9369c5a171aa5cc5.
 - Supabase migrations for term-exam progress and weekly question history are applied to the live project.
+
+
+## 2026-09-18 — Guided learner dashboard and stronger anti-repeat selection
+
+- Added a visible week-by-week roadmap to the student dashboard so learners can immediately see the current week, completed weeks, locked weeks, and the Term Final Exam stage.
+- The dashboard's primary action now points to the learner's actual current weekly assessment or unlocked Term Final Exam rather than sending the learner back into the older topic-first mastery loop.
+- Weekly and term-final selection now excludes questions already encountered in other major activity types for that learner, reducing cross-stage repeats as well as same-stage repeats.
