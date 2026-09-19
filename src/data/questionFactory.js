@@ -89,27 +89,43 @@ const matrixQuestion=(topic,level,n,seed,difficulty)=>{const a=rand(`${seed}:a`,
 const countingQuestion=(topic,level,n,seed,difficulty)=>{const total=rand(`${seed}:n`,5,10),r=rand(`${seed}:r`,2,total-1),type=hash(`${seed}:type`)%2;let perm=1;for(let i=0;i<r;i++)perm*=total-i;let comb=1;for(let i=1;i<=r;i++)comb=comb*(total-r+i)/i;const c=type?perm:comb;return q(`${level}-gen-${n}`,topic,type?`How many ordered arrangements can be made by choosing ${r} objects from ${total} different objects?`:`How many groups of ${r} can be chosen from ${total} objects when order does not matter?`,c,type?`Use nPr=${total}×…=${c}.`:`Use nCr=${total}!/(${r}!(${total-r})!)=${c}.`,difficulty,type?'Apply permutations':'Apply combinations')};
 const vectorQuestion=(topic,level,n,seed,difficulty)=>{const a=rand(`${seed}:a`,1,9),b=rand(`${seed}:b`,1,9),c=rand(`${seed}:c`,1,9),d=rand(`${seed}:d`,1,9),type=hash(`${seed}:type`)%2,ans=type?a+c:a*d-b*c;return q(`${level}-gen-${n}`,topic,type?`For u=(${a},${b}) and v=(${c},${d}), find the x-component of u+v.`:`For u=(${a},${b}) and v=(${c},${d}), find ad−bc.`,ans,type?`${a}+${c}=${ans}.`:`${a}×${d}−${b}×${c}=${ans}.`,difficulty,'Apply vector operations')};
 const primaryLowerQuestion=(topic,level,n,seed,difficulty)=>{
- const t=String(topic).toLowerCase(),band=level==='P1'?'p1':level==='P2'?'p2':'p3';
- const isFraction=/fraction/.test(t),isGeometry=/shape|measurement|length|time|weight|space|3-dimensional|2-dimensional|geometry/.test(t),isStats=/data|pictogram|chart|statistics/.test(t);
- if(isFraction){
-  if(band==='p1'){const den=pick(seed,[2,4]),correct=1;return q(`${level}-gen-${n}`,topic,`One of ${den} equal parts is called what fraction?`,den===2?'1/2':'1/4',`One of ${den} equal parts is ${den===2?'1/2':'1/4'}.`,difficulty,'Recognise simple fractions',1,{options:den===2?['1/2','1/3','1/4','2/2']:['1/2','1/4','2/4','1/3'],answer:den===2?0:1});}
-  const den=pick(seed,[2,4]),num=den===2?1:pick(seed,[1,2,3]);if(band==='p2'){const shown=pick(seed,['1/2','1/4','2/4','3/4']);return q(`${level}-gen-${n}`,topic,`Which fraction shows ${shown}?`,shown,`The fraction is ${shown}.`,difficulty,'Read and recognise simple fractions',1,{options:['1/2','1/4','2/4','3/4'],answer:['1/2','1/4','2/4','3/4'].indexOf(shown)});}
-  const a=rand(seed,1,den-1),b=rand(seed+':b',1,den-1),sum=a+b;return q(`${level}-gen-${n}`,topic,`Add ${a}/${den} and ${b}/${den}. Give the numerator.`,sum,`${a}+${b}=${sum}.`,difficulty,'Add fractions with like denominators',1);
+ const t=String(topic).toLowerCase(),p1=level==='P1',p2=level==='P2';
+ const id=`${level}-gen-${n}`;
+ const makeSimple=(text,correct,explanation,objective)=>q(id,topic,text,correct,explanation,difficulty,objective,1);
+ if(t.includes('fraction')){
+  if(p1){const den=pick(seed,[2,4]),correct=den===2?'1/2':'1/4',options=den===2?['1/2','1/3','1/4','2/2']:['1/2','1/4','2/4','1/3'];return{id,topic,q:`One of ${den} equal parts is called what fraction?`,options,answer:options.indexOf(correct),explanation:`One of ${den} equal parts is ${correct}.`,difficulty,objective:'Recognise halves and quarters',sourceType:'CURRICULUM_ORIGINAL'};}
+  if(p2){const options=['1/2','1/4','2/4','3/4'],correct=pick(seed,options);return{id,topic,q:`Which fraction shows ${correct}?`,options,answer:options.indexOf(correct),explanation:`The fraction shown is ${correct}.`,difficulty,objective:'Read simple fractions',sourceType:'CURRICULUM_ORIGINAL'};}
+  const den=pick(seed,[2,3,4,5]),a=rand(seed+':a',1,den-1),b=rand(seed+':b',1,den-1),sum=a+b;return makeSimple(`Add ${a}/${den} and ${b}/${den}. Give the numerator.`,sum,`${a}+${b}=${sum}.`,'Add fractions with like denominators');
  }
- if(isGeometry){
-  if(band==='p1'){const shapes=['circle','triangle','square','rectangle'],s=pick(seed,shapes),answers=['Circle','Triangle','Square','Rectangle'],correct=s.charAt(0).toUpperCase()+s.slice(1);return{id:`${level}-gen-${n}`,topic,q:`Which shape is a ${s}?`,options:answers,answer:answers.indexOf(correct),explanation:`The answer is the ${s}.`,difficulty,objective:'Recognise common shapes',sourceType:'CURRICULUM_ORIGINAL'};}
-  if(band==='p2'){const a=rand(seed,2,12),b=rand(seed+':b',2,12);return q(`${level}-gen-${n}`,topic,`A rectangle has ${a} cm on one side and ${b} cm on the other. What is its perimeter?`,2*(a+b),`2×(${a}+${b})=${2*(a+b)} cm.`,difficulty,'Find the perimeter of a rectangle',1);}
-  const a=rand(seed,2,12),b=rand(seed+':b',2,12);return q(`${level}-gen-${n}`,topic,`A rectangle is ${a} cm long and ${b} cm wide. What is its area?`,a*b,`${a}×${b}=${a*b} cm².`,difficulty,'Find the area of a rectangle',1);
+ if(t.includes('addition')){
+  const hi=p1?10:p2?50:100,a=rand(seed+':a',0,hi),b=rand(seed+':b',0,hi);return makeSimple(`What is ${a} + ${b}?`,a+b,`${a}+${b}=${a+b}.`,'Add whole numbers');
  }
- if(isStats){const a=rand(seed,1,9),b=rand(seed+':b',1,9),c=rand(seed+':c',1,9),total=a+b+c;return q(`${level}-gen-${n}`,topic,`${a} pupils chose football, ${b} chose books and ${c} chose music. How many pupils are there altogether?`,total,`${a}+${b}+${c}=${total}.`,difficulty,'Count and compare simple class data',1);}
- const hi=band==='p1'?20:band==='p2'?50:100,type=hash(seed)%7,a=rand(seed+':a',0,hi),b=rand(seed+':b',0,hi);
- if(type===0){const x=a+b;return q(`${level}-gen-${n}`,topic,`What is ${a} + ${b}?`,x,`${a}+${b}=${x}.`,difficulty,'Add whole numbers',1);}
- if(type===1){const x=Math.max(a,b),y=Math.min(a,b);return q(`${level}-gen-${n}`,topic,`Which number is greater: ${x} or ${y}?`,x,`${x} is greater than ${y}.`,difficulty,'Compare whole numbers',1);}
- if(type===2){const x=Math.max(a,b),y=Math.min(a,b),d=x-y;return q(`${level}-gen-${n}`,topic,`What is ${x} - ${y}?`,d,`${x}-${y}=${d}.`,difficulty,'Subtract whole numbers',1);}
- if(type===3&&band!=='p1'){const m=rand(seed+':m',2,5),x=rand(seed+':x',1,10),ans=m*x;return q(`${level}-gen-${n}`,topic,`There are ${x} groups of ${m}. How many are there altogether?`,ans,`${x}×${m}=${ans}.`,difficulty,'Use multiplication in equal groups',1);}
- if(type===4&&band==='p3'){const d=rand(seed+':d',2,5),x=rand(seed+':x',2,10)*d,ans=x/d;return q(`${level}-gen-${n}`,topic,`${x} objects are shared equally among ${d} children. How many does each child get?`,ans,`${x}÷${d}=${ans}.`,difficulty,'Use sharing to divide whole numbers',1);}
- if(type===5){const x=rand(seed+':x',1,9),place=pick(seed+':place',['ones','tens']),num=place==='ones'?x*10+x:x*10+rand(seed+':r',0,9);const ans=place==='ones'?x:Math.floor(num/10)*10;return q(`${level}-gen-${n}`,topic,`What is the value of the digit ${place==='ones'?x:Math.floor(num/10)} in ${num}?`,ans,`The value is ${ans}.`,difficulty,'Identify place value',1);}
- const x=rand(seed+':x',1,20);return q(`${level}-gen-${n}`,topic,`What number comes after ${x}?`,x+1,`${x}+1=${x+1}.`,difficulty,'Count forward by one',1);
+ if(t.includes('subtraction')){
+  const hi=p1?10:p2?50:100,a=rand(seed+':a',0,hi),b=rand(seed+':b',0,a),ans=a-b;return makeSimple(`What is ${a} - ${b}?`,ans,`${a}-${b}=${ans}.`,'Subtract whole numbers');
+ }
+ if(t.includes('open sentence')){
+  const x=rand(seed+':x',1,p1?9:p2?30:50),b=rand(seed+':b',1,10),sum=x+b;return makeSimple(`Complete: ${x} + __ = ${sum}.`,b,`${x}+${b}=${sum}.`,'Complete an open sentence');
+ }
+ if(t.includes('nigerian money')){
+  const amounts=p1?[5,10,20,50]:p2?[20,50,100,200]:[50,100,200,500],a=pick(seed,amounts),b=pick(seed+':b',amounts);return makeSimple(`Which amount is greater: ₦${a} or ₦${b}?`,Math.max(a,b),`₦${Math.max(a,b)} is greater.`,'Compare Nigerian money amounts');
+ }
+ if(t.includes('length')||t.includes('weight')){
+  const pairs=t.includes('weight')?[['feather','stone'],['leaf','book'],['pencil','table']]:[['pencil','ruler'],['spoon','door'],['coin','school bag']],pair=pick(seed,pairs);const correct=pick(seed+':c',pair);return{id,topic,q:`Which is ${t.includes('weight')?'heavier':'longer'}: a ${pair[0]} or a ${pair[1]}?`,options:[`A ${pair[0]}`,`A ${pair[1]}`, 'They are the same','Cannot tell'],answer:correct===pair[0]?0:1,explanation:`A ${correct} is usually ${t.includes('weight')?'heavier':'longer'} than the other object in this example.`,difficulty,objective:`Compare ${t.includes('weight')?'weight':'length'}`,sourceType:'CURRICULUM_ORIGINAL'};}
+ if(t.includes('time')){
+  const questions=[['How many days are in one week?',7],['Which day comes after Monday?',2],['Which day comes before Friday?',4]];const [text,ans]=pick(seed,questions);const opts=text.includes('days')?['5','6','7','8']:text.includes('after')?['Sunday','Tuesday','Wednesday','Thursday']:['Wednesday','Thursday','Friday','Saturday'];return{id,topic,q:text,options:opts,answer:opts.indexOf(String(ans))>=0?opts.indexOf(String(ans)):text.includes('after')?1:2,explanation:text.includes('days')?'There are 7 days in one week.':text.includes('after')?'Tuesday comes after Monday.':'Thursday comes before Friday.',difficulty,objective:'Understand simple time concepts',sourceType:'CURRICULUM_ORIGINAL'};}
+ if(t.includes('2-dimensional')){
+  const shapes=[['triangle',3],['square',4],['rectangle',4],['circle',0]],s=pick(seed,shapes),opts=['Triangle','Square','Rectangle','Circle'];return{id,topic,q:`How many sides does a ${s[0]} have?`,options:['0','3','4','5'],answer:s[1]===0?0:s[1]===3?1:2,explanation:`A ${s[0]} has ${s[1]} sides.`,difficulty,objective:'Recognise two-dimensional shapes',sourceType:'CURRICULUM_ORIGINAL'};}
+ if(t.includes('3-dimensional')){
+  const shapes=['cube','cuboid','sphere','cylinder'],s=pick(seed,shapes),opts=['Cube','Cuboid','Sphere','Cylinder'];return{id,topic,q:`Which object is shaped like a ${s}?`,options:opts,answer:opts.indexOf(s.charAt(0).toUpperCase()+s.slice(1)),explanation:`A ${s} is a three-dimensional shape.`,difficulty,objective:'Recognise three-dimensional shapes',sourceType:'CURRICULUM_ORIGINAL'};}
+ if(t.includes('data')){
+  const a=rand(seed+':a',1,5),b=rand(seed+':b',1,5),c=rand(seed+':c',1,5),total=a+b+c;return makeSimple(`${a} pupils chose football, ${b} chose books and ${c} chose music. How many pupils are there altogether?`,total,`${a}+${b}+${c}=${total}.`,'Count simple class data');
+ }
+ if(t.includes('whole number 0')){
+  const x=rand(seed+':x',1,9);return makeSimple(`A child has ${x} sweets and gives all of them away. How many sweets remain?`,0,`All ${x} sweets are gone, so 0 remain.`,'Understand zero');
+ }
+ const hi=p1?20:p2?50:100,a=rand(seed+':a',0,hi),b=rand(seed+':b',0,hi);
+ if(t.includes('1-5')||t.includes('6-9')||t.includes('whole number 10')||t.includes('1-99')){const x=Math.max(a,b),y=Math.min(a,b);const type=hash(seed)%3;if(type===0)return makeSimple(`Which number is greater: ${x} or ${y}?`,x,`${x} is greater than ${y}.`,'Compare whole numbers');if(type===1)return makeSimple(`Which number comes after ${x}?`,x+1,`${x}+1=${x+1}.`,'Count forward');return makeSimple(`Which number comes before ${x}?`,x-1,`${x}-1=${x-1}.`,'Count backward');}
+ const x=rand(seed+':x',1,20);return makeSimple(`What number comes after ${x}?`,x+1,`${x}+1=${x+1}.`,'Count forward');
 };
 function make(topic,level,index){const n=index+1,seed=`${level}|${topic}|${n}`,difficulty=difficultyFor(index,level),family=familyFor(topic);if(/^P[1-3]$/.test(level))return primaryLowerQuestion(topic,level,n,seed,difficulty);switch(family){case'fraction':return fractionQuestion(topic,level,n,seed,difficulty);case'stats':return statsQuestion(topic,level,n,seed,difficulty);case'geometry':return geometryQuestion(topic,level,n,seed,difficulty);case'algebra':return algebraQuestion(topic,level,n,seed,difficulty);case'indices':return indicesQuestion(topic,level,n,seed,difficulty);case'sequence':return sequenceQuestion(topic,level,n,seed,difficulty);case'trig':return trigQuestion(topic,level,n,seed,difficulty);case'calculus':return calculusQuestion(topic,level,n,seed,difficulty);case'financial':return financialQuestion(topic,level,n,seed,difficulty);case'sets':return setsQuestion(topic,level,n,seed,difficulty);case'matrix':return matrixQuestion(topic,level,n,seed,difficulty);case'counting':return countingQuestion(topic,level,n,seed,difficulty);case'vector':return vectorQuestion(topic,level,n,seed,difficulty);default:return numberQuestion(topic,level,n,seed,difficulty)}}
 const normalize=s=>String(s||'').trim().toLowerCase().replace(/\s+/g,' ');
