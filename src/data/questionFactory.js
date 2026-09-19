@@ -93,38 +93,72 @@ const primaryLowerQuestion=(topic,level,n,seed,difficulty)=>{
  const id=`${level}-gen-${n}`;
  const makeSimple=(text,correct,explanation,objective)=>q(id,topic,text,correct,explanation,difficulty,objective,1);
  if(t.includes('fraction')){
-  if(p1){const den=pick(seed,[2,4]),correct=den===2?'1/2':'1/4',options=den===2?['1/2','1/3','1/4','2/2']:['1/2','1/4','2/4','1/3'];return{id,topic,q:`One of ${den} equal parts is called what fraction?`,options,answer:options.indexOf(correct),explanation:`One of ${den} equal parts is ${correct}.`,difficulty,objective:'Recognise halves and quarters',sourceType:'CURRICULUM_ORIGINAL'};}
-  if(p2){const options=['1/2','1/4','2/4','3/4'],correct=pick(seed,options);return{id,topic,q:`Which fraction shows ${correct}?`,options,answer:options.indexOf(correct),explanation:`The fraction shown is ${correct}.`,difficulty,objective:'Read simple fractions',sourceType:'CURRICULUM_ORIGINAL'};}
+  if(p1){const type=hash(seed)%6,den=type%2?4:2;
+   if(type<2){const correct=den===2?'1/2':'1/4',options=den===2?['1/2','1/3','1/4','2/2']:['1/2','1/4','2/4','1/3'];return{id,topic,q:`One of ${den} equal parts is called what fraction?`,options,answer:options.indexOf(correct),explanation:`One of ${den} equal parts is ${correct}.`,difficulty,objective:'Recognise halves and quarters',sourceType:'CURRICULUM_ORIGINAL'};}
+   const object=pick(seed+':o',['orange','cake','apple','bread','mango','paper','pizza','chocolate']),parts=den===2?'two':'four';const correct=den===2?1:1;return{id,topic,q:`A ${object} is cut into ${parts} equal parts. What fraction is one part?`,options:den===2?['1/2','1/3','1/4','2/2']:['1/2','1/4','2/4','1/3'],answer:den===2?0:1,explanation:`One of ${den} equal parts is ${den===2?'1/2':'1/4'}.`,difficulty,objective:'Recognise halves and quarters',sourceType:'CURRICULUM_ORIGINAL'};}
+  if(p2){const whole=rand(seed+':w',2,20),half=whole%2===0?whole/2:whole+1,options=[Math.max(1,half-1),half,half+1,half+2];return q(id,topic,`What is half of ${whole%2===0?whole:whole+1}?`,half,`Half means divide into 2 equal parts: ${half}.`,difficulty,'Find one-half of a whole number');}
   const den=pick(seed,[2,3,4,5]),a=rand(seed+':a',1,den-1),b=rand(seed+':b',1,den-1),sum=a+b;return makeSimple(`Add ${a}/${den} and ${b}/${den}. Give the numerator.`,sum,`${a}+${b}=${sum}.`,'Add fractions with like denominators');
  }
  if(t.includes('addition')){
-  const hi=p1?10:p2?50:100,a=rand(seed+':a',0,hi),b=rand(seed+':b',0,hi);return makeSimple(`What is ${a} + ${b}?`,a+b,`${a}+${b}=${a+b}.`,'Add whole numbers');
+  const hi=p1?99:p2?500:1000,a=rand(seed+':a',0,hi),b=rand(seed+':b',0,Math.min(hi,99)),ans=a+b;return makeSimple(`What is ${a} + ${b}?`,ans,`${a}+${b}=${ans}.`,'Add whole numbers');
  }
  if(t.includes('subtraction')){
-  const hi=p1?10:p2?50:100,a=rand(seed+':a',0,hi),b=rand(seed+':b',0,a),ans=a-b;return makeSimple(`What is ${a} - ${b}?`,ans,`${a}-${b}=${ans}.`,'Subtract whole numbers');
+  const hi=p1?99:p2?500:1000,a=rand(seed+':a',0,hi),b=rand(seed+':b',0,Math.min(a,99)),ans=a-b;return makeSimple(`What is ${a} - ${b}?`,ans,`${a}-${b}=${ans}.`,'Subtract whole numbers');
  }
  if(t.includes('open sentence')){
-  const x=rand(seed+':x',1,p1?9:p2?30:50),b=rand(seed+':b',1,10),sum=x+b;return makeSimple(`Complete: ${x} + __ = ${sum}.`,b,`${x}+${b}=${sum}.`,'Complete an open sentence');
+  const x=rand(seed+':x',1,p1?20:p2?50:100),b=rand(seed+':b',1,20),sum=x+b;return makeSimple(`Complete: ${x} + __ = ${sum}.`,b,`${x}+${b}=${sum}.`,'Complete an open sentence');
  }
  if(t.includes('nigerian money')){
-  const amounts=p1?[5,10,20,50]:p2?[20,50,100,200]:[50,100,200,500],a=pick(seed,amounts),b=pick(seed+':b',amounts);return makeSimple(`Which amount is greater: ₦${a} or ₦${b}?`,Math.max(a,b),`₦${Math.max(a,b)} is greater.`,'Compare Nigerian money amounts');
+  const amounts=p1?[5,10,20,50,100]:p2?[20,50,100,200,500]:[50,100,200,500,1000],a=pick(seed,amounts),b=pick(seed+':b',amounts),type=hash(seed)%4;
+  if(type===0)return makeSimple(`Which amount is greater: ₦${a} or ₦${b}?`,Math.max(a,b),`₦${Math.max(a,b)} is greater.`,'Compare Nigerian money amounts');
+  if(type===1)return makeSimple(`You have ₦${a} and receive ₦${b}. How much do you have altogether?`,a+b,`₦${a}+₦${b}=₦${a+b}.`,'Add Nigerian money amounts');
+  if(type===2&&a>=b)return makeSimple(`You have ₦${a} and spend ₦${b}. How much remains?`,a-b,`₦${a}-₦${b}=₦${a-b}.`,'Subtract Nigerian money amounts');
+  return makeSimple(`Which amount is smaller: ₦${a} or ₦${b}?`,Math.min(a,b),`₦${Math.min(a,b)} is smaller.`,'Compare Nigerian money amounts');
  }
- if(t.includes('length')||t.includes('weight')){
-  const pairs=t.includes('weight')?[['feather','stone'],['leaf','book'],['pencil','table']]:[['pencil','ruler'],['spoon','door'],['coin','school bag']],pair=pick(seed,pairs);const correct=pick(seed+':c',pair);return{id,topic,q:`Which is ${t.includes('weight')?'heavier':'longer'}: a ${pair[0]} or a ${pair[1]}?`,options:[`A ${pair[0]}`,`A ${pair[1]}`, 'They are the same','Cannot tell'],answer:correct===pair[0]?0:1,explanation:`A ${correct} is usually ${t.includes('weight')?'heavier':'longer'} than the other object in this example.`,difficulty,objective:`Compare ${t.includes('weight')?'weight':'length'}`,sourceType:'CURRICULUM_ORIGINAL'};}
+ if(t.includes('length')){
+  const type=hash(seed)%4,a=rand(seed+':a',2,30),b=rand(seed+':b',2,30);
+  if(type===0)return makeSimple(`Which is longer: a ${pick(seed+':o',['pencil','ruler','rope','stick'])} of ${Math.max(a,b)} cm or one of ${Math.min(a,b)} cm?`,Math.max(a,b),`${Math.max(a,b)} cm is longer.`,'Compare lengths');
+  if(type===1)return makeSimple(`A pencil is ${a} cm long. Another pencil is ${b} cm long. Which is longer?`,Math.max(a,b),`${Math.max(a,b)} cm is longer.`,'Compare lengths');
+  if(type===2)return makeSimple(`A ruler is ${a} cm long. How many centimetres are there in two such rulers?`,a*2,`${a}+${a}=${a*2} cm.`,'Measure length in centimetres');
+  return makeSimple(`Which tool can help you measure length: a ruler or a plate?`,0,'A ruler is used to measure length.','Choose a tool for measuring length');
+ }
+ if(t.includes('weight')){
+  const a=rand(seed+':a',1,20),b=rand(seed+':b',1,20),heavy=Math.max(a,b),light=Math.min(a,b),type=hash(seed)%3;
+  if(type===0)return makeSimple(`Which is heavier: ${heavy} kg or ${light} kg?`,heavy,`${heavy} kg is heavier.`,'Compare weights');
+  if(type===1)return makeSimple(`Which is lighter: ${light} kg or ${heavy} kg?`,light,`${light} kg is lighter.`,'Compare weights');
+  return{id,topic,q:'Which tool can help compare weight?',options:['Scale','Ruler','Clock','Plate'],answer:0,explanation:'A scale can be used to compare or measure weight.',difficulty,objective:'Identify a tool for measuring weight',sourceType:'CURRICULUM_ORIGINAL'};
+ }
  if(t.includes('time')){
-  const questions=[['How many days are in one week?',7],['Which day comes after Monday?',2],['Which day comes before Friday?',4]];const [text,ans]=pick(seed,questions);const opts=text.includes('days')?['5','6','7','8']:text.includes('after')?['Sunday','Tuesday','Wednesday','Thursday']:['Wednesday','Thursday','Friday','Saturday'];return{id,topic,q:text,options:opts,answer:opts.indexOf(String(ans))>=0?opts.indexOf(String(ans)):text.includes('after')?1:2,explanation:text.includes('days')?'There are 7 days in one week.':text.includes('after')?'Tuesday comes after Monday.':'Thursday comes before Friday.',difficulty,objective:'Understand simple time concepts',sourceType:'CURRICULUM_ORIGINAL'};}
+  const type=hash(seed)%4;
+  if(type===0){const days=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'],i=hash(seed+':d')%7,next=days[(i+1)%7];return{id,topic,q:`Which day comes after ${days[i]}?`,options:[days[(i+5)%7],next,days[(i+2)%7],days[(i+3)%7]],answer:1,explanation:`${next} comes after ${days[i]}.`,difficulty,objective:'Understand days of the week',sourceType:'CURRICULUM_ORIGINAL'};}
+  if(type===1){const h=1+hash(seed+':h')%12;return{id,topic,q:`If the clock shows ${h} o'clock, what hour is it?`,options:[String(h),String((h%12)+1),String(Math.max(1,h-1)),String((h+2)%12||12)],answer:0,explanation:`The clock shows ${h} o'clock.`,difficulty,objective:'Read simple clock hours',sourceType:'CURRICULUM_ORIGINAL'};}
+  if(type===2){const h=1+hash(seed+':h')%12;return{id,topic,q:`What time comes one hour after ${h} o'clock?`,options:[String(h),String((h%12)+1),String((h+10)%12||12),String((h+2)%12||12)],answer:1,explanation:`One hour after ${h} o'clock is ${(h%12)+1} o'clock.`,difficulty,objective:'Sequence simple times',sourceType:'CURRICULUM_ORIGINAL'};}
+  const month=1+hash(seed+':m')%12;return makeSimple(`How many months are in one year?`,12,'There are 12 months in one year.','Understand simple calendar facts');
+ }
  if(t.includes('2-dimensional')){
-  const shapes=[['triangle',3],['square',4],['rectangle',4],['circle',0]],s=pick(seed,shapes),opts=['Triangle','Square','Rectangle','Circle'];return{id,topic,q:`How many sides does a ${s[0]} have?`,options:['0','3','4','5'],answer:s[1]===0?0:s[1]===3?1:2,explanation:`A ${s[0]} has ${s[1]} sides.`,difficulty,objective:'Recognise two-dimensional shapes',sourceType:'CURRICULUM_ORIGINAL'};}
+  const shapes=[['triangle',3],['square',4],['rectangle',4],['circle',0]],s=pick(seed,shapes),type=hash(seed)%3;
+  if(type===0){const opts=['Triangle','Square','Rectangle','Circle'];return{id,topic,q:`Which shape is a ${s[0]}?`,options:opts,answer:opts.indexOf(s[0].charAt(0).toUpperCase()+s[0].slice(1)),explanation:`The answer is the ${s[0]}.`,difficulty,objective:'Recognise two-dimensional shapes',sourceType:'CURRICULUM_ORIGINAL'};}
+  if(type===1){const opts=['0','3','4','5'],answer=s[1]===0?0:s[1]===3?1:2;return{id,topic,q:`How many sides does a ${s[0]} have?`,options:opts,answer,explanation:`A ${s[0]} has ${s[1]} sides.`,difficulty,objective:'Count sides of simple shapes',sourceType:'CURRICULUM_ORIGINAL'};}
+  const corner=s[1]===3?3:s[1]===4?4:0;return makeSimple(`How many corners does a ${s[0]} have?`,corner,`A ${s[0]} has ${corner} corners.`,'Recognise corners of simple shapes');
+ }
  if(t.includes('3-dimensional')){
-  const shapes=['cube','cuboid','sphere','cylinder'],s=pick(seed,shapes),opts=['Cube','Cuboid','Sphere','Cylinder'];return{id,topic,q:`Which object is shaped like a ${s}?`,options:opts,answer:opts.indexOf(s.charAt(0).toUpperCase()+s.slice(1)),explanation:`A ${s} is a three-dimensional shape.`,difficulty,objective:'Recognise three-dimensional shapes',sourceType:'CURRICULUM_ORIGINAL'};}
+  const shapes=[['cube','dice'],['cuboid','box'],['sphere','ball'],['cylinder','can']],s=pick(seed,shapes),opts=['Cube','Cuboid','Sphere','Cylinder'];return{id,topic,q:`Which everyday object is shaped like a ${s[0]}?`,options:opts,answer:opts.indexOf(s[0].charAt(0).toUpperCase()+s[0].slice(1)),explanation:`A ${s[1]} is an example of a ${s[0]}.`,difficulty,objective:'Recognise three-dimensional shapes',sourceType:'CURRICULUM_ORIGINAL'};
+ }
  if(t.includes('data')){
-  const a=rand(seed+':a',1,5),b=rand(seed+':b',1,5),c=rand(seed+':c',1,5),total=a+b+c;return makeSimple(`${a} pupils chose football, ${b} chose books and ${c} chose music. How many pupils are there altogether?`,total,`${a}+${b}+${c}=${total}.`,'Count simple class data');
+  const a=rand(seed+':a',1,9),b=rand(seed+':b',1,9),c=rand(seed+':c',1,9),type=hash(seed)%3,total=a+b+c;
+  if(type===0)return makeSimple(`${a} pupils chose football, ${b} chose books and ${c} chose music. How many pupils are there altogether?`,total,`${a}+${b}+${c}=${total}.`,'Count simple class data');
+  if(type===1)return makeSimple(`${a} pupils chose football and ${b} chose books. Which choice has more pupils?`,a>=b?'Football':'Books',`The larger number is ${Math.max(a,b)}.`,'Compare simple class data');
+  return makeSimple(`A class recorded ${a} boys and ${b} girls. How many pupils were recorded?`,a+b,`${a}+${b}=${a+b}.`,'Count simple class data');
  }
- if(t.includes('whole number 0')){
-  const x=rand(seed+':x',1,9);return makeSimple(`A child has ${x} sweets and gives all of them away. How many sweets remain?`,0,`All ${x} sweets are gone, so 0 remain.`,'Understand zero');
+ if(t.includes('whole number 0')){const x=rand(seed+':x',1,20);return makeSimple(`A child has ${x} sweets and gives all of them away. How many sweets remain?`,0,`All ${x} sweets are gone, so 0 remain.`,'Understand zero');}
+ const hi=p1?99:p2?500:1000,a=rand(seed+':a',0,hi),b=rand(seed+':b',0,hi);
+ if(t.includes('1-5')||t.includes('6-9')||t.includes('whole number 10')||t.includes('1-99')){
+  const x=Math.max(a,b),y=Math.min(a,b),type=hash(seed)%4;
+  if(type===0)return makeSimple(`Which number is greater: ${x} or ${y}?`,x,`${x} is greater than ${y}.`,'Compare whole numbers');
+  if(type===1)return makeSimple(`Which number comes after ${x}?`,x+1,`${x}+1=${x+1}.`,'Count forward');
+  if(type===2)return makeSimple(`Which number comes before ${x}?`,x-1,`${x}-1=${x-1}.`,'Count backward');
+  return makeSimple(`Count on from ${x}: what comes next?`,x+1,`${x}+1=${x+1}.`,'Count forward');
  }
- const hi=p1?20:p2?50:100,a=rand(seed+':a',0,hi),b=rand(seed+':b',0,hi);
- if(t.includes('1-5')||t.includes('6-9')||t.includes('whole number 10')||t.includes('1-99')){const x=Math.max(a,b),y=Math.min(a,b);const type=hash(seed)%3;if(type===0)return makeSimple(`Which number is greater: ${x} or ${y}?`,x,`${x} is greater than ${y}.`,'Compare whole numbers');if(type===1)return makeSimple(`Which number comes after ${x}?`,x+1,`${x}+1=${x+1}.`,'Count forward');return makeSimple(`Which number comes before ${x}?`,x-1,`${x}-1=${x-1}.`,'Count backward');}
  const x=rand(seed+':x',1,20);return makeSimple(`What number comes after ${x}?`,x+1,`${x}+1=${x+1}.`,'Count forward');
 };
 function make(topic,level,index){const n=index+1,seed=`${level}|${topic}|${n}`,difficulty=difficultyFor(index,level),family=familyFor(topic);if(/^P[1-3]$/.test(level))return primaryLowerQuestion(topic,level,n,seed,difficulty);switch(family){case'fraction':return fractionQuestion(topic,level,n,seed,difficulty);case'stats':return statsQuestion(topic,level,n,seed,difficulty);case'geometry':return geometryQuestion(topic,level,n,seed,difficulty);case'algebra':return algebraQuestion(topic,level,n,seed,difficulty);case'indices':return indicesQuestion(topic,level,n,seed,difficulty);case'sequence':return sequenceQuestion(topic,level,n,seed,difficulty);case'trig':return trigQuestion(topic,level,n,seed,difficulty);case'calculus':return calculusQuestion(topic,level,n,seed,difficulty);case'financial':return financialQuestion(topic,level,n,seed,difficulty);case'sets':return setsQuestion(topic,level,n,seed,difficulty);case'matrix':return matrixQuestion(topic,level,n,seed,difficulty);case'counting':return countingQuestion(topic,level,n,seed,difficulty);case'vector':return vectorQuestion(topic,level,n,seed,difficulty);default:return numberQuestion(topic,level,n,seed,difficulty)}}
