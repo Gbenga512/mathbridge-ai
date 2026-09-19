@@ -120,7 +120,7 @@ const primaryLowerQuestion=(topic,level,n,seed,difficulty)=>{
   if(type===0)return makeSimple(`Which is longer: a ${pick(seed+':o',['pencil','ruler','rope','stick'])} of ${Math.max(a,b)} cm or one of ${Math.min(a,b)} cm?`,Math.max(a,b),`${Math.max(a,b)} cm is longer.`,'Compare lengths');
   if(type===1)return makeSimple(`A pencil is ${a} cm long. Another pencil is ${b} cm long. Which is longer?`,Math.max(a,b),`${Math.max(a,b)} cm is longer.`,'Compare lengths');
   if(type===2)return makeSimple(`A ruler is ${a} cm long. How many centimetres are there in two such rulers?`,a*2,`${a}+${a}=${a*2} cm.`,'Measure length in centimetres');
-  return makeSimple(`Which tool can help you measure length: a ruler or a plate?`,0,'A ruler is used to measure length.','Choose a tool for measuring length');
+  return{id,topic,q:'Which tool can help you measure length?',options:['Ruler','Plate','Cup','Spoon'],answer:0,explanation:'A ruler is used to measure length.',difficulty,objective:'Identify a tool for measuring length',sourceType:'CURRICULUM_ORIGINAL'};
  }
  if(t.includes('weight')){
   const a=rand(seed+':a',1,20),b=rand(seed+':b',1,20),heavy=Math.max(a,b),light=Math.min(a,b),type=hash(seed)%3;
@@ -147,7 +147,7 @@ const primaryLowerQuestion=(topic,level,n,seed,difficulty)=>{
  if(t.includes('data')){
   const a=rand(seed+':a',1,9),b=rand(seed+':b',1,9),c=rand(seed+':c',1,9),type=hash(seed)%3,total=a+b+c;
   if(type===0)return makeSimple(`${a} pupils chose football, ${b} chose books and ${c} chose music. How many pupils are there altogether?`,total,`${a}+${b}+${c}=${total}.`,'Count simple class data');
-  if(type===1)return makeSimple(`${a} pupils chose football and ${b} chose books. Which choice has more pupils?`,a>=b?'Football':'Books',`The larger number is ${Math.max(a,b)}.`,'Compare simple class data');
+  if(type===1){const correct=a>=b?'Football':'Books';return{id,topic,q:`${a} pupils chose football and ${b} chose books. Which choice has more pupils?`,options:['Football','Books','They are equal','Cannot tell'],answer:correct==='Football'?0:1,explanation:`The larger number is ${Math.max(a,b)}.`,difficulty,objective:'Compare simple class data',sourceType:'CURRICULUM_ORIGINAL'};}
   return makeSimple(`A class recorded ${a} boys and ${b} girls. How many pupils were recorded?`,a+b,`${a}+${b}=${a+b}.`,'Count simple class data');
  }
  if(t.includes('whole number 0')){const x=rand(seed+':x',1,20);return makeSimple(`A child has ${x} sweets and gives all of them away. How many sweets remain?`,0,`All ${x} sweets are gone, so 0 remain.`,'Understand zero');}
