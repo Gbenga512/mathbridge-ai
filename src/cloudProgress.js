@@ -54,3 +54,14 @@ export async function linkChild(parentId,childId){
  try{const key=`mathbridge-parent:${parentId}`;const existing=JSON.parse(localStorage.getItem(key)||'[]');if(!existing.includes(childId))existing.push(childId);localStorage.setItem(key,JSON.stringify(existing));return existing}catch{return[]}
 }
 export async function getLinkedChildren(parentId){if(supabaseConfigured){const {data,error}=await supabase.from('parent_children').select('child_id').eq('parent_id',parentId);if(!error)return (data||[]).map(x=>x.child_id)}try{return JSON.parse(localStorage.getItem(`mathbridge-parent:${parentId}`)||'[]')}catch{return[]}}
+
+export async function getSchoolJoinOptions(schoolCode){
+ if(!supabaseConfigured)return {data:null,error:new Error('Cloud school services are not configured.')};
+ const {data,error}=await supabase.rpc('get_school_join_options',{p_school_code:String(schoolCode||'').trim()});
+ return {data,error};
+}
+export async function joinSchoolByCode(schoolCode,classId){
+ if(!supabaseConfigured)return {data:null,error:new Error('Cloud school services are not configured.')};
+ const {data,error}=await supabase.rpc('join_school_by_code',{p_school_code:String(schoolCode||'').trim(),p_class_id:classId});
+ return {data,error};
+}
