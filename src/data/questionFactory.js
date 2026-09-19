@@ -97,7 +97,7 @@ const primaryLowerQuestion=(topic,level,n,seed,difficulty)=>{
   const a=rand(seed,1,den-1),b=rand(seed+':b',1,den-1),sum=a+b;return q(`${level}-gen-${n}`,topic,`Add ${a}/${den} and ${b}/${den}. Give the numerator.`,sum,`${a}+${b}=${sum}.`,difficulty,'Add fractions with like denominators',1);
  }
  if(isGeometry){
-  if(band==='p1'){const shapes=['circle','triangle','square','rectangle'],s=pick(seed,shapes),answers=['Circle','Triangle','Square','Rectangle'];return q(`${level}-gen-${n}`,topic,`Which shape is a ${s}?`,s.charAt(0).toUpperCase()+s.slice(1),`The answer is the ${s}.`,difficulty,'Recognise common shapes',1,{options:answers,answer:answers.indexOf(s.charAt(0).toUpperCase()+s.slice(1))});}
+  if(band==='p1'){const shapes=['circle','triangle','square','rectangle'],s=pick(seed,shapes),answers=['Circle','Triangle','Square','Rectangle'],correct=s.charAt(0).toUpperCase()+s.slice(1);return{id:`${level}-gen-${n}`,topic,q:`Which shape is a ${s}?`,options:answers,answer:answers.indexOf(correct),explanation:`The answer is the ${s}.`,difficulty,objective:'Recognise common shapes',sourceType:'CURRICULUM_ORIGINAL'};}
   if(band==='p2'){const a=rand(seed,2,12),b=rand(seed+':b',2,12);return q(`${level}-gen-${n}`,topic,`A rectangle has ${a} cm on one side and ${b} cm on the other. What is its perimeter?`,2*(a+b),`2×(${a}+${b})=${2*(a+b)} cm.`,difficulty,'Find the perimeter of a rectangle',1);}
   const a=rand(seed,2,12),b=rand(seed+':b',2,12);return q(`${level}-gen-${n}`,topic,`A rectangle is ${a} cm long and ${b} cm wide. What is its area?`,a*b,`${a}×${b}=${a*b} cm².`,difficulty,'Find the area of a rectangle',1);
  }
